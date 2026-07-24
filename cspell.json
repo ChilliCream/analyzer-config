@@ -1,0 +1,18 @@
+{
+  "$schema": "https://raw.githubusercontent.com/streetsidesoftware/cspell/main/cspell.schema.json",
+  "version": "0.2",
+  "language": "en",
+  "dictionaries": ["csharp", "custom"],
+  "dictionaryDefinitions": [
+    {
+      "name": "custom",
+      "path": "./dictionary.txt"
+    }
+  ],
+  "ignorePaths": [
+    "*.DotSettings*",
+    "**/bin/",
+    "**/obj/",
+    "packages.lock.json"
+  ]
+}

@@ -1,0 +1,24 @@
+<Project>
+
+  <PropertyGroup>
+    <Authors>ChilliCream authors and contributors</Authors>
+    <Company>ChilliCream Inc.</Company>
+    <Copyright>Copyright &#169; ChilliCream Inc.</Copyright>
+    <DevelopmentDependency>true</DevelopmentDependency>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <IncludeBuildOutput>false</IncludeBuildOutput>
+    <Nullable>enable</Nullable>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageProjectUrl>https://chillicream.com</PackageProjectUrl>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <PackageReleaseNotes>Release notes: https://github.com/ChilliCream/analyzer-config/releases/tag/$(PackageVersion)</PackageReleaseNotes>
+    <RepositoryUrl>https://github.com/ChilliCream/analyzer-config</RepositoryUrl>
+    <SuppressDependenciesWhenPacking>true</SuppressDependenciesWhenPacking>
+    <TargetFramework>net10.0</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Include="$(MSBuildThisFileDirectory)README.md" Pack="true" PackagePath="" Visible="false" />
+  </ItemGroup>
+
+</Project>

@@ -1,0 +1,7 @@
+<Project>
+
+  <ItemGroup>
+    <EditorConfigFiles Include="$(MSBuildThisFileDirectory)../Libraries.globalconfig" />
+  </ItemGroup>
+
+</Project>

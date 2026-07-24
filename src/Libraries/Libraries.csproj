@@ -1,0 +1,14 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <AssemblyName>ChilliCream.AnalyzerConfig.Libraries</AssemblyName>
+    <PackageDescription>The ChilliCream analyzer configuration for C# libraries.</PackageDescription>
+    <PackageId>ChilliCream.AnalyzerConfig.Libraries</PackageId>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Include="Libraries.globalconfig" Pack="true" PackagePath="" />
+    <None Include="build/**/*" Pack="true" PackagePath="build" />
+  </ItemGroup>
+
+</Project>

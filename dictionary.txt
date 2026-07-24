@@ -1,0 +1,5 @@
+accessibilities
+globalconfig
+resharper
+Roslynator
+SYSLIB
