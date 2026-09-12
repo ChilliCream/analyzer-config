@@ -65,7 +65,7 @@ dotnet_diagnostic.IDE0034.severity = warning
 # Order modifiers.
 dotnet_diagnostic.IDE0036.severity = warning
 # Use inferred member name.
-dotnet_diagnostic.IDE0037.severity = warning
+dotnet_diagnostic.IDE0037.severity = none
 # Use pattern matching to avoid `is` check followed by a cast (without variable).
 dotnet_diagnostic.IDE0038.severity = warning
 # Add accessibility modifiers.
