@@ -56,6 +56,8 @@ public sealed class SimplifyNameAnalyzer : DiagnosticAnalyzer
         }
 
         if (node.FirstAncestorOrSelf<DocumentationCommentTriviaSyntax>() is not null
+            || node.FirstAncestorOrSelf<UsingDirectiveSyntax>() is not null
+            || IsNamespaceDeclarationName(node)
             || node.ContainsDirectives
             || DottedName.Create(node) is not { } dottedName)
         {
@@ -112,6 +114,12 @@ public sealed class SimplifyNameAnalyzer : DiagnosticAnalyzer
         }
 
         return false;
+    }
+
+    private static bool IsNamespaceDeclarationName(SyntaxNode node)
+    {
+        return node.FirstAncestorOrSelf<BaseNamespaceDeclarationSyntax>()
+            ?.Name.Span.Contains(node.Span) == true;
     }
 
     private static void Report(
