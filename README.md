@@ -29,3 +29,11 @@ The code-style analyzer rules only run in the IDE by default. To also enforce th
 ```
 
 `GenerateDocumentationFile` also reports public members that have no XML documentation comment (CS1591). To turn that off, add `<NoWarn>$(NoWarn);CS1591</NoWarn>` to the same property group.
+
+## Analyzers
+
+| Rule | Title |
+| ---- | ----- |
+| [CCA0001](https://github.com/ChilliCream/analyzer-config/blob/main/docs/rules/CCA0001.md) | Simplify name |
+
+These rules run during `dotnet build` without `EnforceCodeStyleInBuild`. The `ChilliCream.AnalyzerConfig.Libraries` package sets their severity to `warning`.

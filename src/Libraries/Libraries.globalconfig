@@ -1,5 +1,13 @@
 is_global = true
 
+## ChilliCream ##
+# https://github.com/ChilliCream/analyzer-config/tree/main/docs/rules
+
+# Simplify name.
+dotnet_diagnostic.CCA0001.severity = warning
+dotnet_diagnostic.IDE0001.severity = none
+dotnet_diagnostic.IDE0002.severity = none
+
 ## Quality rules ##
 # https://docs.microsoft.com/en-us/dotnet/fundamentals/code-analysis/quality-rules
 
@@ -30,10 +38,6 @@ dotnet_diagnostic.CA1866.severity = warning
 ## Style rules ##
 # https://docs.microsoft.com/en-us/dotnet/fundamentals/code-analysis/style-rules/
 
-# Simplify name.
-dotnet_diagnostic.IDE0001.severity = warning
-# Simplify member access.
-dotnet_diagnostic.IDE0002.severity = warning
 # Remove `this` or `Me` qualification.
 dotnet_diagnostic.IDE0003.severity = warning
 # Remove unnecessary cast.
@@ -74,8 +78,6 @@ dotnet_style_require_accessibility_modifiers = for_non_interface_members
 # Add readonly modifier.
 dotnet_diagnostic.IDE0044.severity = warning
 dotnet_diagnostic.RCS1169.severity = none
-# Use language keywords instead of framework type names for type references.
-dotnet_diagnostic.IDE0049.severity = warning
 # Remove unused private member.
 dotnet_diagnostic.IDE0051.severity = warning
 dotnet_diagnostic.RCS1213.severity = none
@@ -179,6 +181,11 @@ dotnet_diagnostic.RCS0058.severity = warning
 roslynator_new_line_at_end_of_file = true
 # Remove unnecessary blank line.
 dotnet_diagnostic.RCS0063.severity = warning
+# Use predefined type.
+dotnet_diagnostic.RCS1013.severity = warning
+dotnet_diagnostic.IDE0049.severity = none
+# Simplify `Nullable<T>` to `T?`.
+dotnet_diagnostic.RCS1020.severity = warning
 # Convert lambda expression body to expression body.
 dotnet_diagnostic.RCS1021.severity = warning
 dotnet_diagnostic.IDE0053.severity = none # see https://github.com/dotnet/roslyn/issues/79246
