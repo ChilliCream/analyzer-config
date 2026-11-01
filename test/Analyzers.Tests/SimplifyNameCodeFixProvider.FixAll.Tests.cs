@@ -3,6 +3,62 @@ namespace ChilliCream.Analyzers.Tests;
 public sealed partial class SimplifyNameCodeFixProviderTests
 {
     [Fact]
+    public async Task FixAll_Should_NeedSecondPass_When_RemovedQualifierHasReportedTypeArgument()
+    {
+        // arrange
+        const string source =
+            """
+            using System.Text;
+
+            namespace Lib
+            {
+                public class Outer<T>
+                {
+                    public class Inner;
+                }
+            }
+
+            namespace App
+            {
+                using Lib;
+
+                public class D : Outer<StringBuilder>
+                {
+                    [|Lib.|]Outer<[|System.Text.|]StringBuilder>.Inner M() => new();
+                }
+            }
+            """;
+        const string fixedSource =
+            """
+            using System.Text;
+
+            namespace Lib
+            {
+                public class Outer<T>
+                {
+                    public class Inner;
+                }
+            }
+
+            namespace App
+            {
+                using Lib;
+
+                public class D : Outer<StringBuilder>
+                {
+                    Inner M() => new();
+                }
+            }
+            """;
+        var test = CreateTest(source, fixedSource);
+        test.NumberOfIncrementalIterations = 3;
+        test.NumberOfFixAllIterations = 2;
+
+        // act & assert
+        await test.RunAsync(TestContext.Current.CancellationToken);
+    }
+
+    [Fact]
     public async Task FixAll_Should_ProduceSimpleName_When_QualifiedAttributeWithSuffix()
     {
         // arrange

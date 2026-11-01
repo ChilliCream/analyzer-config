@@ -37,3 +37,5 @@ The code-style analyzer rules only run in the IDE by default. To also enforce th
 | [CCA0001](https://github.com/ChilliCream/analyzer-config/blob/main/docs/rules/CCA0001.md) | Simplify name |
 
 These rules run during `dotnet build` without `EnforceCodeStyleInBuild`. The `ChilliCream.AnalyzerConfig.Libraries` package sets their severity to `warning`.
+
+The analyzers need the .NET 10 SDK or later, and older SDKs skip them with warning CS9057.

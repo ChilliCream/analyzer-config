@@ -60,6 +60,35 @@ public sealed partial class SimplifyNameAnalyzerTests
     }
 
     [Fact]
+    public async Task Analyze_Should_ReportNothing_When_ColorColorPropertyHasOtherTypeOfSameName()
+    {
+        // arrange
+        const string source =
+            """
+            namespace Paint
+            {
+                public class Color
+                {
+                    public class Nested
+                    {
+                        public static int X;
+                    }
+                }
+            }
+
+            public class C
+            {
+                public Paint.Color Color { get; } = null!;
+
+                public int M() => Paint.Color.Nested.X;
+            }
+            """;
+
+        // act & assert
+        await VerifyAsync(source);
+    }
+
+    [Fact]
     public async Task Analyze_Should_ReportNothing_When_NameAfterOpenGenericName()
     {
         // arrange
@@ -72,6 +101,123 @@ public sealed partial class SimplifyNameAnalyzerTests
                 }
 
                 System.Type M() => typeof(Outer<>.Inner);
+            }
+            """;
+
+        // act & assert
+        await VerifyAsync(source);
+    }
+
+    [Fact]
+    public async Task Analyze_Should_ReportNothing_When_NestedTypeContainerIsEarlierLocal()
+    {
+        // arrange
+        const string source =
+            """
+            namespace Lib
+            {
+                public class Outer
+                {
+                    public class Inner
+                    {
+                        public static int Create() => 0;
+                    }
+                }
+            }
+
+            public class C
+            {
+                public int M()
+                {
+                    var Outer = new Lib.Outer();
+
+                    return Lib.Outer.Inner.Create();
+                }
+            }
+            """;
+
+        // act & assert
+        await VerifyAsync(source);
+    }
+
+    [Fact]
+    public async Task Analyze_Should_ReportNothing_When_NestedTypeContainerIsParameter()
+    {
+        // arrange
+        const string source =
+            """
+            namespace Lib
+            {
+                public class Outer
+                {
+                    public class Inner
+                    {
+                        public static int Create() => 0;
+                    }
+                }
+            }
+
+            public class C
+            {
+                public int M(Lib.Outer Outer) => Lib.Outer.Inner.Create();
+            }
+            """;
+
+        // act & assert
+        await VerifyAsync(source);
+    }
+
+    [Fact]
+    public async Task Analyze_Should_ReportNothing_When_NestedTypeContainerIsProperty()
+    {
+        // arrange
+        const string source =
+            """
+            namespace Lib
+            {
+                public class Outer
+                {
+                    public class Inner
+                    {
+                        public static int Create() => 0;
+                    }
+                }
+            }
+
+            public class C
+            {
+                public Lib.Outer Outer { get; } = new();
+
+                public int M() => Lib.Outer.Inner.Create();
+            }
+            """;
+
+        // act & assert
+        await VerifyAsync(source);
+    }
+
+    [Fact]
+    public async Task Analyze_Should_ReportNothing_When_NestedTypeContainerIsPropertyInNameof()
+    {
+        // arrange
+        const string source =
+            """
+            namespace Lib
+            {
+                public class Outer
+                {
+                    public class Inner
+                    {
+                        public static int Create() => 0;
+                    }
+                }
+            }
+
+            public class C
+            {
+                public Lib.Outer Outer { get; } = new();
+
+                public string M() => nameof(Lib.Outer.Inner);
             }
             """;
 

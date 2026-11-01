@@ -3,6 +3,40 @@ namespace ChilliCream.Analyzers.Tests;
 public sealed partial class SimplifyNameAnalyzerTests
 {
     [Fact]
+    public async Task Analyze_Should_ReportNamespace_When_ColorColorQualifierOfNestedType()
+    {
+        // arrange
+        const string source =
+            """
+            namespace Lib
+            {
+                public class Outer
+                {
+                    public class Inner
+                    {
+                        public static int Create() => 0;
+                    }
+                }
+            }
+
+            namespace App
+            {
+                using Lib;
+
+                public class C
+                {
+                    public Outer Outer { get; } = new();
+
+                    public int M() => [|Lib.|]Outer.Inner.Create();
+                }
+            }
+            """;
+
+        // act & assert
+        await VerifyAsync(source);
+    }
+
+    [Fact]
     public async Task Analyze_Should_ReportNamespace_When_EarlierLocalWithSameNameAndType()
     {
         // arrange

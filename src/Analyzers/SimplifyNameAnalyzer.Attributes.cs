@@ -16,7 +16,10 @@ public sealed partial class SimplifyNameAnalyzer
         var name = attribute.Name;
 
         if (name.ContainsDirectives
-            || DottedName.Create(name) is not { } dottedName)
+            || DottedName.Create(name) is not { } dottedName
+            || (dottedName.Segments.Length == 1
+                && dottedName.Alias is null
+                && !HasRemovableSuffix(dottedName.Segments[0].Identifier)))
         {
             return;
         }
@@ -34,12 +37,8 @@ public sealed partial class SimplifyNameAnalyzer
             return;
         }
 
-        if (HasErrors(context.SemanticModel, name.Span, context.CancellationToken))
-        {
-            return;
-        }
-
         var keptStart = name.SpanStart;
+        bool? hasErrors = null;
 
         foreach (var form in dottedName.GetForms(constructor.ContainingType))
         {
@@ -50,6 +49,13 @@ public sealed partial class SimplifyNameAnalyzer
                     constructor))
             {
                 continue;
+            }
+
+            hasErrors ??= HasErrors(context.SemanticModel, name.Span, context.CancellationToken);
+
+            if (hasErrors.Value)
+            {
+                return;
             }
 
             if (ContainsReportedTypeArgument(
@@ -69,7 +75,22 @@ public sealed partial class SimplifyNameAnalyzer
             break;
         }
 
-        ReportSuffix(context, attribute, dottedName, constructor, keptStart);
+        if (GetSuffixSimplification(
+            context.SemanticModel,
+            attribute,
+            dottedName,
+            constructor,
+            keptStart) is not { } suffix)
+        {
+            return;
+        }
+
+        hasErrors ??= HasErrors(context.SemanticModel, name.Span, context.CancellationToken);
+
+        if (!hasErrors.Value)
+        {
+            Report(context, suffix);
+        }
     }
 
     private static bool BindsConstructor(
@@ -85,19 +106,8 @@ public sealed partial class SimplifyNameAnalyzer
         return SymbolEqualityComparer.Default.Equals(candidate.Symbol, constructor);
     }
 
-    private static bool HasRemovableSuffix(SyntaxToken identifier)
-    {
-        var text = identifier.ValueText;
-
-        return text.Length > AttributeSuffix.Length
-            && text.EndsWith(AttributeSuffix, StringComparison.Ordinal)
-            && text == identifier.Text
-            && SyntaxFacts.GetKeywordKind(
-                text.Substring(0, text.Length - AttributeSuffix.Length)) == SyntaxKind.None;
-    }
-
-    private static void ReportSuffix(
-        SyntaxNodeAnalysisContext context,
+    private static Simplification? GetSuffixSimplification(
+        SemanticModel semanticModel,
         AttributeSyntax attribute,
         DottedName dottedName,
         IMethodSymbol constructor,
@@ -107,7 +117,7 @@ public sealed partial class SimplifyNameAnalyzer
 
         if (!HasRemovableSuffix(identifier))
         {
-            return;
+            return null;
         }
 
         var name = attribute.Name;
@@ -119,21 +129,32 @@ public sealed partial class SimplifyNameAnalyzer
             suffixSpan.Start - name.SpanStart,
             suffixSpan.Length);
 
-        if (!BindsConstructor(context.SemanticModel, attribute, withoutSuffix, constructor))
+        if (!BindsConstructor(semanticModel, attribute, withoutSuffix, constructor))
         {
-            return;
+            return null;
         }
 
         if (keptStart != name.SpanStart
             && !BindsConstructor(
-                context.SemanticModel,
+                semanticModel,
                 attribute,
                 withoutSuffix.Substring(keptStart - name.SpanStart),
                 constructor))
         {
-            return;
+            return null;
         }
 
-        Report(context, new Simplification(suffixSpan, AttributeSuffix));
+        return new Simplification(suffixSpan, AttributeSuffix);
+    }
+
+    private static bool HasRemovableSuffix(SyntaxToken identifier)
+    {
+        var text = identifier.ValueText;
+
+        return text.Length > AttributeSuffix.Length
+            && text.EndsWith(AttributeSuffix, StringComparison.Ordinal)
+            && text == identifier.Text
+            && SyntaxFacts.GetKeywordKind(
+                text.Substring(0, text.Length - AttributeSuffix.Length)) == SyntaxKind.None;
     }
 }

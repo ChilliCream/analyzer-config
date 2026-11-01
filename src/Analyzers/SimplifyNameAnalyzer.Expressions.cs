@@ -6,6 +6,20 @@ namespace ChilliCream.Analyzers;
 
 public sealed partial class SimplifyNameAnalyzer
 {
+    private static bool BindsAsType(
+        SemanticModel semanticModel,
+        int position,
+        string text,
+        ITypeSymbol type)
+    {
+        var candidate = semanticModel.GetSpeculativeSymbolInfo(
+            position,
+            SyntaxFactory.ParseTypeName(text),
+            SpeculativeBindingOption.BindAsTypeOrNamespace);
+
+        return SymbolEqualityComparer.Default.Equals(candidate.Symbol, type);
+    }
+
     private static Simplification? GetExpressionSimplification(
         SemanticModel semanticModel,
         DottedName dottedName,
@@ -75,8 +89,14 @@ public sealed partial class SimplifyNameAnalyzer
                         SpeculativeBindingOption.BindAsExpression)
                     .Symbol;
 
-            if (firstKeptSymbol is ILocalSymbol local
-                && IsDeclaredAfter(local, examined.SpanStart, cancellationToken))
+            if (form.FirstKept != simpleName
+                && firstKeptSymbol is not INamespaceOrTypeSymbol
+                && !IsColorColorQualifier(
+                    semanticModel,
+                    examined.SpanStart,
+                    form.FirstKept,
+                    firstKeptSymbol,
+                    cancellationToken))
             {
                 continue;
             }
@@ -103,6 +123,35 @@ public sealed partial class SimplifyNameAnalyzer
         return null;
     }
 
+    private static ITypeSymbol? GetReceiverType(
+        ISymbol? receiver,
+        int position,
+        CancellationToken cancellationToken)
+    {
+        return receiver switch
+        {
+            IFieldSymbol field => field.Type,
+            ILocalSymbol local
+                when !IsDeclaredAfter(local, position, cancellationToken) => local.Type,
+            IParameterSymbol parameter => parameter.Type,
+            IPropertySymbol property => property.Type,
+            _ => null
+        };
+    }
+
+    private static bool IsColorColorQualifier(
+        SemanticModel semanticModel,
+        int position,
+        SimpleNameSyntax qualifier,
+        ISymbol? receiver,
+        CancellationToken cancellationToken)
+    {
+        var receiverType = GetReceiverType(receiver, position, cancellationToken);
+
+        return receiverType is not null
+            && BindsAsType(semanticModel, position, qualifier.ToString(), receiverType);
+    }
+
     private static bool IsColorColorReceiver(
         SemanticModel semanticModel,
         SyntaxNode examined,
@@ -111,15 +160,7 @@ public sealed partial class SimplifyNameAnalyzer
         INamedTypeSymbol type,
         CancellationToken cancellationToken)
     {
-        var receiverType = receiver switch
-        {
-            IFieldSymbol field => field.Type,
-            ILocalSymbol local
-                when !IsDeclaredAfter(local, examined.SpanStart, cancellationToken) => local.Type,
-            IParameterSymbol parameter => parameter.Type,
-            IPropertySymbol property => property.Type,
-            _ => null
-        };
+        var receiverType = GetReceiverType(receiver, examined.SpanStart, cancellationToken);
 
         if (!SymbolEqualityComparer.Default.Equals(receiverType, type)
             || examined.Parent is not MemberAccessExpressionSyntax memberAccess
@@ -137,12 +178,7 @@ public sealed partial class SimplifyNameAnalyzer
             return false;
         }
 
-        var typeCandidate = semanticModel.GetSpeculativeSymbolInfo(
-            examined.SpanStart,
-            SyntaxFactory.ParseTypeName(keptText),
-            SpeculativeBindingOption.BindAsTypeOrNamespace);
-
-        if (!SymbolEqualityComparer.Default.Equals(typeCandidate.Symbol, type))
+        if (!BindsAsType(semanticModel, examined.SpanStart, keptText, type))
         {
             return false;
         }
