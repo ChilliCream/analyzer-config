@@ -9,4 +9,5 @@ rhysd
 Roslynator
 slnx
 SYSLIB
+unreportable
 xunit

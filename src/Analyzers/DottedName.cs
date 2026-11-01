@@ -45,6 +45,14 @@ internal sealed class DottedName
             return [];
         }
 
+        for (var i = 0; i < Segments.Length - 1; i++)
+        {
+            if (Segments[i] is GenericNameSyntax { IsUnboundGenericName: true })
+            {
+                return [];
+            }
+        }
+
         var forms = ImmutableArray.CreateBuilder<NameForm>();
 
         if (Segments.Length >= 2 || Alias is not null)

@@ -44,15 +44,47 @@ public sealed partial class SimplifyNameAnalyzer : DiagnosticAnalyzer
 
     private static void AnalyzeDottedName(SyntaxNodeAnalysisContext context)
     {
-        var node = context.Node;
+        if (GetSimplification(
+            context.SemanticModel,
+            context.Node,
+            context.CancellationToken) is { } simplification)
+        {
+            Report(context, simplification);
+        }
+    }
 
+    private static bool ContainsReportedTypeArgument(
+        SemanticModel semanticModel,
+        SyntaxNode node,
+        TextSpan removedSpan,
+        CancellationToken cancellationToken)
+    {
+        foreach (var descendant in node.DescendantNodes(removedSpan))
+        {
+            if (descendant is QualifiedNameSyntax or AliasQualifiedNameSyntax
+                && removedSpan.Contains(descendant.Span)
+                && IsInTypeArgumentList(descendant, node)
+                && GetSimplification(semanticModel, descendant, cancellationToken) is not null)
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private static Simplification? GetSimplification(
+        SemanticModel semanticModel,
+        SyntaxNode node,
+        CancellationToken cancellationToken)
+    {
         switch (node.Parent)
         {
             case QualifiedNameSyntax qualifiedName when qualifiedName.Left == node:
             case MemberAccessExpressionSyntax memberAccess when memberAccess.Expression == node:
             case AttributeSyntax:
             case QualifiedCrefSyntax:
-                return;
+                return null;
         }
 
         if (node.FirstAncestorOrSelf<DocumentationCommentTriviaSyntax>() is not null
@@ -61,26 +93,24 @@ public sealed partial class SimplifyNameAnalyzer : DiagnosticAnalyzer
             || node.ContainsDirectives
             || DottedName.Create(node) is not { } dottedName)
         {
-            return;
+            return null;
         }
 
         if (!SyntaxFacts.IsInNamespaceOrTypeContext((ExpressionSyntax)node))
         {
-            AnalyzeExpression(context, dottedName);
-
-            return;
+            return GetExpressionSimplification(semanticModel, dottedName, cancellationToken);
         }
 
-        var cancellationToken = context.CancellationToken;
-        var semanticModel = context.SemanticModel;
         var symbolInfo = semanticModel.GetSymbolInfo(node, cancellationToken);
 
         if (symbolInfo.Symbol is not INamedTypeSymbol type
             || type.TypeKind == TypeKind.Error
             || !symbolInfo.CandidateSymbols.IsEmpty)
         {
-            return;
+            return null;
         }
+
+        bool? hasErrors = null;
 
         foreach (var form in dottedName.GetForms(type))
         {
@@ -94,16 +124,31 @@ public sealed partial class SimplifyNameAnalyzer : DiagnosticAnalyzer
                 SyntaxFactory.ParseTypeName(dottedName.GetKeptText(form)),
                 SpeculativeBindingOption.BindAsTypeOrNamespace);
 
-            if (SymbolEqualityComparer.Default.Equals(candidate.Symbol, type))
+            if (!SymbolEqualityComparer.Default.Equals(candidate.Symbol, type))
             {
-                if (!HasErrors(semanticModel, node.Span, cancellationToken))
-                {
-                    Report(context, form.RemovedSpan, dottedName.GetRemovedText(form));
-                }
-
-                return;
+                continue;
             }
+
+            hasErrors ??= HasErrors(semanticModel, node.Span, cancellationToken);
+
+            if (hasErrors.Value)
+            {
+                return null;
+            }
+
+            if (ContainsReportedTypeArgument(
+                semanticModel,
+                node,
+                form.RemovedSpan,
+                cancellationToken))
+            {
+                continue;
+            }
+
+            return new Simplification(form.RemovedSpan, dottedName.GetRemovedText(form));
         }
+
+        return null;
     }
 
     private static bool HasErrors(
@@ -137,6 +182,20 @@ public sealed partial class SimplifyNameAnalyzer : DiagnosticAnalyzer
         return SyntaxFactory.ParseExpression(simplified) is not CastExpressionSyntax;
     }
 
+    private static bool IsInTypeArgumentList(SyntaxNode name, SyntaxNode root)
+    {
+        for (var ancestor = name.Parent; ancestor is not null && ancestor != root;
+            ancestor = ancestor.Parent)
+        {
+            if (ancestor is TypeArgumentListSyntax)
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
     private static bool IsNamespaceDeclarationName(SyntaxNode node)
     {
         return node.FirstAncestorOrSelf<BaseNamespaceDeclarationSyntax>()
@@ -145,13 +204,12 @@ public sealed partial class SimplifyNameAnalyzer : DiagnosticAnalyzer
 
     private static void Report(
         SyntaxNodeAnalysisContext context,
-        TextSpan removedSpan,
-        string removedText)
+        Simplification simplification)
     {
         context.ReportDiagnostic(
             Diagnostic.Create(
                 s_rule,
-                Location.Create(context.Node.SyntaxTree, removedSpan),
-                removedText));
+                Location.Create(context.Node.SyntaxTree, simplification.RemovedSpan),
+                simplification.RemovedText));
     }
 }

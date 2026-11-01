@@ -1,18 +1,16 @@
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using Microsoft.CodeAnalysis.Diagnostics;
 
 namespace ChilliCream.Analyzers;
 
 public sealed partial class SimplifyNameAnalyzer
 {
-    private static void AnalyzeExpression(
-        SyntaxNodeAnalysisContext context,
-        DottedName dottedName)
+    private static Simplification? GetExpressionSimplification(
+        SemanticModel semanticModel,
+        DottedName dottedName,
+        CancellationToken cancellationToken)
     {
-        var cancellationToken = context.CancellationToken;
-        var semanticModel = context.SemanticModel;
         var examinedIndex = -1;
         INamedTypeSymbol? type = null;
 
@@ -37,11 +35,13 @@ public sealed partial class SimplifyNameAnalyzer
             || (examinedIndex == 0 && dottedName.Alias is null)
             || DottedName.Create(dottedName.GetPrefix(examinedIndex)) is not { } examinedName)
         {
-            return;
+            return null;
         }
 
         var examined = examinedName.Node;
         var simpleName = examinedName.Segments[examinedName.Segments.Length - 1];
+
+        bool? hasErrors = null;
 
         foreach (var form in examinedName.GetForms(type))
         {
@@ -81,13 +81,26 @@ public sealed partial class SimplifyNameAnalyzer
                 continue;
             }
 
-            if (!HasErrors(semanticModel, examined.Span, cancellationToken))
+            hasErrors ??= HasErrors(semanticModel, examined.Span, cancellationToken);
+
+            if (hasErrors.Value)
             {
-                Report(context, form.RemovedSpan, examinedName.GetRemovedText(form));
+                return null;
             }
 
-            return;
+            if (ContainsReportedTypeArgument(
+                semanticModel,
+                examined,
+                form.RemovedSpan,
+                cancellationToken))
+            {
+                continue;
+            }
+
+            return new Simplification(form.RemovedSpan, examinedName.GetRemovedText(form));
         }
+
+        return null;
     }
 
     private static bool IsColorColorReceiver(
