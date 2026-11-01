@@ -2,6 +2,7 @@
 
   <PropertyGroup>
     <AssemblyName>ChilliCream.AnalyzerConfig.Libraries</AssemblyName>
+    <NoWarn>$(NoWarn);NU5128</NoWarn>
     <PackageDescription>The ChilliCream analyzer configuration for C# libraries.</PackageDescription>
     <PackageId>ChilliCream.AnalyzerConfig.Libraries</PackageId>
   </PropertyGroup>
@@ -9,6 +10,11 @@
   <ItemGroup>
     <None Include="Libraries.globalconfig" Pack="true" PackagePath="" />
     <None Include="build/**/*" Pack="true" PackagePath="build" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- PrivateAssets="none" lets the analyzers flow to projects that install this package. -->
+    <ProjectReference Include="../Analyzers/Analyzers.csproj" PrivateAssets="none" />
   </ItemGroup>
 
 </Project>

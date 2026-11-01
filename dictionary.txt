@@ -1,5 +1,9 @@
 accessibilities
 globalconfig
+netstandard
 resharper
+rhysd
 Roslynator
+slnx
 SYSLIB
+xunit

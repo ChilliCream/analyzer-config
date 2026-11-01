@@ -1,6 +1,6 @@
 # ChilliCream AnalyzerConfig
 
-ChilliCream [analyzer configurations](https://learn.microsoft.com/en-us/visualstudio/code-quality/use-roslyn-analyzers) for C# projects.
+ChilliCream analyzers and [analyzer configurations](https://learn.microsoft.com/en-us/visualstudio/code-quality/use-roslyn-analyzers) for C# projects.
 
 ## Installation
 
@@ -14,6 +14,8 @@ dotnet add package Roslynator.Analyzers
 dotnet add package Roslynator.CodeAnalysis.Analyzers
 dotnet add package Roslynator.Formatting.Analyzers
 ```
+
+The configuration package installs the ChilliCream analyzers (`ChilliCream.Analyzers`) as a dependency.
 
 Because the package is a development dependency, NuGet automatically references it with `PrivateAssets="all"`, so it does not flow to consumers of your library.
 
