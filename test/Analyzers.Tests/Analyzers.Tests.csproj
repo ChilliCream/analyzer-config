@@ -1,7 +1,10 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
+  <Import Project="../../src/Libraries/build/ChilliCream.AnalyzerConfig.Libraries.props" />
+
   <PropertyGroup>
     <AssemblyName>ChilliCream.Analyzers.Tests</AssemblyName>
+    <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
     <OutputType>Exe</OutputType>
     <RootNamespace>ChilliCream.Analyzers.Tests</RootNamespace>
     <TargetFramework>net10.0</TargetFramework>
@@ -15,12 +18,22 @@
     <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Analyzer.Testing" />
     <!-- Dependency of Microsoft.CodeAnalysis.CSharp.Analyzer.Testing. Pinned to secure version. -->
     <PackageReference Include="System.Security.Cryptography.Pkcs" VersionOverride="9.0.21" />
+    <PackageReference Include="Roslynator.Analyzers" PrivateAssets="all" />
+    <PackageReference Include="Roslynator.CodeAnalysis.Analyzers" PrivateAssets="all" />
+    <PackageReference Include="Roslynator.Formatting.Analyzers" PrivateAssets="all" />
     <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Workspaces" />
     <PackageReference Include="xunit.v3.mtp-v2" />
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference
+      Include="../../src/Analyzers.Bootstrap/Analyzers.Bootstrap.csproj"
+      OutputItemType="Analyzer"
+      PrivateAssets="all"
+      ReferenceOutputAssembly="false" />
     <ProjectReference Include="../../src/Analyzers/Analyzers.csproj" />
   </ItemGroup>
+
+  <Import Project="../../src/Libraries/build/ChilliCream.AnalyzerConfig.Libraries.targets" />
 
 </Project>
