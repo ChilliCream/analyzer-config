@@ -10,6 +10,7 @@
     }
   ],
   "ignorePaths": [
+    "*.Designer.cs",
     "*.DotSettings*",
     "**/bin/",
     "**/obj/",

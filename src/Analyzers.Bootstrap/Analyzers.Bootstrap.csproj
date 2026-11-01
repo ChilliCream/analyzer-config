@@ -1,0 +1,30 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!-- Compiles the analyzers from src/Analyzers so that this repository's projects run them. -->
+
+  <PropertyGroup>
+    <AssemblyName>ChilliCream.Analyzers.Bootstrap</AssemblyName>
+    <IsPackable>false</IsPackable>
+    <RootNamespace>ChilliCream.Analyzers</RootNamespace>
+  </PropertyGroup>
+
+  <!-- Design-time builds leave the sources out, so editors analyze them only in src/Analyzers. -->
+  <ItemGroup Condition="'$(DesignTimeBuild)' != 'true'">
+    <Compile Include="../Analyzers/**/*.cs" Exclude="../Analyzers/bin/**;../Analyzers/obj/**" />
+    <EmbeddedResource
+      Include="../Analyzers/Resources.resx"
+      LogicalName="ChilliCream.Analyzers.Resources.resources" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp" PrivateAssets="all" />
+  </ItemGroup>
+
+  <!-- No analyzers run here; src/Analyzers analyzes these sources. -->
+  <Target Name="RemoveAnalyzers" BeforeTargets="CoreCompile">
+    <ItemGroup>
+      <Analyzer Remove="@(Analyzer)" />
+    </ItemGroup>
+  </Target>
+
+</Project>

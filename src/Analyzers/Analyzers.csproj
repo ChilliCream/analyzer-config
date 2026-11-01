@@ -1,0 +1,71 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <Import Project="../Libraries/build/ChilliCream.AnalyzerConfig.Libraries.props" />
+
+  <PropertyGroup>
+    <AssemblyName>ChilliCream.Analyzers</AssemblyName>
+    <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
+    <EnforceExtendedAnalyzerRules>true</EnforceExtendedAnalyzerRules>
+    <IsRoslynComponent>true</IsRoslynComponent>
+    <PackageDescription>The ChilliCream analyzers for C# projects.</PackageDescription>
+    <PackageId>ChilliCream.Analyzers</PackageId>
+    <RootNamespace>ChilliCream.Analyzers</RootNamespace>
+    <SuppressDependenciesWhenPacking>true</SuppressDependenciesWhenPacking>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <AdditionalFiles Include="AnalyzerReleases.Shipped.md" />
+    <AdditionalFiles Include="AnalyzerReleases.Unshipped.md" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Update="Resources.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Resources.resx</DependentUpon>
+    </Compile>
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Update="Resources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+  </ItemGroup>
+
+  <ItemGroup>
+    <None
+      Include="$(OutputPath)$(AssemblyName).dll"
+      Pack="true"
+      PackagePath="analyzers/dotnet/cs"
+      Visible="false" />
+    <None
+      Include="../Analyzers.CodeFixes/$(OutputPath)ChilliCream.Analyzers.CodeFixes.dll"
+      Pack="true"
+      PackagePath="analyzers/dotnet/cs"
+      Visible="false" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.CodeAnalysis.Analyzers" PrivateAssets="all" />
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp" PrivateAssets="all" />
+    <PackageReference Include="Roslynator.Analyzers" PrivateAssets="all" />
+    <PackageReference Include="Roslynator.CodeAnalysis.Analyzers" PrivateAssets="all" />
+    <PackageReference Include="Roslynator.Formatting.Analyzers" PrivateAssets="all" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference
+      Include="../Analyzers.CodeFixes/Analyzers.CodeFixes.csproj"
+      PrivateAssets="all"
+      ReferenceOutputAssembly="false" />
+    <ProjectReference
+      Include="../Analyzers.Bootstrap/Analyzers.Bootstrap.csproj"
+      OutputItemType="Analyzer"
+      PrivateAssets="all"
+      ReferenceOutputAssembly="false" />
+  </ItemGroup>
+
+  <Import Project="../Libraries/build/ChilliCream.AnalyzerConfig.Libraries.targets" />
+
+</Project>

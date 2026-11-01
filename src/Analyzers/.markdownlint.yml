@@ -1,0 +1,6 @@
+# The release-tracking analyzer rejects a top-level heading (RS2007), so the files start with `;`
+# comments instead.
+MD041: false
+# The release-tracking analyzer rejects a table separator row with spaces next to its pipes
+# (RS2007), which an aligned table needs.
+MD060: false

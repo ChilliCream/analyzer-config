@@ -1,5 +1,14 @@
 accessibilities
+crefs
 globalconfig
+netstandard
 resharper
+resheader
+resmimetype
+resx
+rhysd
 Roslynator
+slnx
 SYSLIB
+unreportable
+xunit
