@@ -124,6 +124,63 @@ public sealed partial class SimplifyNameAnalyzerTests
     }
 
     [Fact]
+    public async Task Analyze_Should_ReportNamespace_When_ExpressionInFieldInitializer()
+    {
+        // arrange
+        const string source =
+            """
+            using System.Text;
+
+            class C
+            {
+                private static readonly object s_value = [|System.Text.|]Encoding.UTF8;
+            }
+            """;
+
+        // act & assert
+        await VerifyAsync(source);
+    }
+
+    [Fact]
+    public async Task Analyze_Should_ReportNamespace_When_ExpressionInLambda()
+    {
+        // arrange
+        const string source =
+            """
+            using System;
+
+            class C
+            {
+                void M()
+                {
+                    Func<int> f = () => [|System.|]Environment.ProcessorCount;
+                }
+            }
+            """;
+
+        // act & assert
+        await VerifyAsync(source);
+    }
+
+    [Fact]
+    public async Task Analyze_Should_ReportNamespace_When_GenericTypeInExpression()
+    {
+        // arrange
+        const string source =
+            """
+            using System.Collections.Generic;
+
+            class C
+            {
+                object M() => [|System.Collections.Generic.|]EqualityComparer<int>.Default;
+            }
+            """;
+
+        // act & assert
+        await VerifyAsync(source);
+    }
+
+    [Fact]
     public async Task Analyze_Should_ReportNamespace_When_GlobalUsingInOtherFile()
     {
         // arrange
@@ -138,6 +195,45 @@ public sealed partial class SimplifyNameAnalyzerTests
 
         // act & assert
         await test.RunAsync(TestContext.Current.CancellationToken);
+    }
+
+    [Fact]
+    public async Task Analyze_Should_ReportNamespace_When_Invocation()
+    {
+        // arrange
+        const string source =
+            """
+            using System;
+
+            class C
+            {
+                void M()
+                {
+                    [|System.|]Console.WriteLine();
+                }
+            }
+            """;
+
+        // act & assert
+        await VerifyAsync(source);
+    }
+
+    [Fact]
+    public async Task Analyze_Should_ReportNamespace_When_NameOf()
+    {
+        // arrange
+        const string source =
+            """
+            using System.Text;
+
+            class C
+            {
+                string M() => nameof([|System.Text.|]StringBuilder);
+            }
+            """;
+
+        // act & assert
+        await VerifyAsync(source);
     }
 
     [Fact]
@@ -202,6 +298,26 @@ public sealed partial class SimplifyNameAnalyzerTests
     }
 
     [Fact]
+    public async Task Analyze_Should_ReportNamespace_When_ParameterDefaultValue()
+    {
+        // arrange
+        const string source =
+            """
+            using System;
+
+            class C
+            {
+                void M([|System.|]DayOfWeek day = [|System.|]DayOfWeek.Monday)
+                {
+                }
+            }
+            """;
+
+        // act & assert
+        await VerifyAsync(source);
+    }
+
+    [Fact]
     public async Task Analyze_Should_ReportNamespace_When_ParameterTypeWithGlobalUsing()
     {
         // arrange
@@ -234,6 +350,57 @@ public sealed partial class SimplifyNameAnalyzerTests
                 void M([|System.Text.|]StringBuilder builder)
                 {
                 }
+            }
+            """;
+
+        // act & assert
+        await VerifyAsync(source);
+    }
+
+    [Fact]
+    public async Task Analyze_Should_ReportNamespace_When_Patterns()
+    {
+        // arrange
+        const string source =
+            """
+            using System;
+            using System.Text;
+
+            class C
+            {
+                int M(object value, DayOfWeek day)
+                {
+                    if (value is [|System.Text.|]StringBuilder builder)
+                    {
+                        return builder.Length;
+                    }
+
+                    switch (day)
+                    {
+                        case [|System.|]DayOfWeek.Monday:
+                            return 1;
+                        default:
+                            return 0;
+                    }
+                }
+            }
+            """;
+
+        // act & assert
+        await VerifyAsync(source);
+    }
+
+    [Fact]
+    public async Task Analyze_Should_ReportNamespace_When_StaticMemberAccess()
+    {
+        // arrange
+        const string source =
+            """
+            using System.Text;
+
+            class C
+            {
+                object M() => [|System.Text.|]Encoding.UTF8;
             }
             """;
 
@@ -436,6 +603,29 @@ public sealed partial class SimplifyNameAnalyzerTests
     }
 
     [Fact]
+    public async Task Analyze_Should_ReportNothing_When_LocalOfOtherTypeWithSimpleName()
+    {
+        // arrange
+        const string source =
+            """
+            using System.Text;
+
+            class C
+            {
+                object M()
+                {
+                    var Encoding = "local";
+
+                    return System.Text.Encoding.UTF8;
+                }
+            }
+            """;
+
+        // act & assert
+        await VerifyAsync(source);
+    }
+
+    [Fact]
     public async Task Analyze_Should_ReportNothing_When_NamespaceNotImported()
     {
         // arrange
@@ -517,6 +707,47 @@ public sealed partial class SimplifyNameAnalyzerTests
                 {
                     Company.Other.Tool M() => new();
                 }
+            }
+            """;
+
+        // act & assert
+        await VerifyAsync(source);
+    }
+
+    [Fact]
+    public async Task Analyze_Should_ReportNothing_When_PropertyHidesStaticMemberType()
+    {
+        // arrange
+        const string source =
+            """
+            using System;
+            using System.Threading;
+
+            class C
+            {
+                public TimeSpan Timeout { get; }
+
+                int M() => System.Threading.Timeout.Infinite;
+            }
+            """;
+
+        // act & assert
+        await VerifyAsync(source);
+    }
+
+    [Fact]
+    public async Task Analyze_Should_ReportNothing_When_PropertyOfOtherTypeWithSimpleName()
+    {
+        // arrange
+        const string source =
+            """
+            using System.IO;
+
+            class C
+            {
+                public string Path { get; } = "";
+
+                string M() => System.IO.Path.Combine(Path, "x");
             }
             """;
 

@@ -8,7 +8,7 @@ using Microsoft.CodeAnalysis.Text;
 namespace ChilliCream.Analyzers;
 
 [DiagnosticAnalyzer(LanguageNames.CSharp)]
-public sealed class SimplifyNameAnalyzer : DiagnosticAnalyzer
+public sealed partial class SimplifyNameAnalyzer : DiagnosticAnalyzer
 {
     private const string HelpLinkUri =
         "https://github.com/ChilliCream/analyzer-config/blob/main/docs/rules/CCA0001.md";
@@ -66,6 +66,8 @@ public sealed class SimplifyNameAnalyzer : DiagnosticAnalyzer
 
         if (!SyntaxFacts.IsInNamespaceOrTypeContext((ExpressionSyntax)node))
         {
+            AnalyzeExpression(context, dottedName);
+
             return;
         }
 
