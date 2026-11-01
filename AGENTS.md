@@ -17,3 +17,5 @@ This file provides guidance to coding agents when working with this repository.
   // assert
   ... assert code ...
   ```
+
+- A call that acts and asserts in one step, such as an analyzer verifier, goes under a single `// act & assert` comment.
