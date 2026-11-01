@@ -2,6 +2,9 @@ accessibilities
 globalconfig
 netstandard
 resharper
+resheader
+resmimetype
+resx
 rhysd
 Roslynator
 slnx
