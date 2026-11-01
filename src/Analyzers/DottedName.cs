@@ -68,6 +68,11 @@ internal sealed class DottedName
             AddForm(forms, Segments[index]);
         }
 
+        if (Alias is not null && Segments.Length >= 2)
+        {
+            AddForm(forms, Segments[0]);
+        }
+
         return forms.ToImmutable();
     }
 

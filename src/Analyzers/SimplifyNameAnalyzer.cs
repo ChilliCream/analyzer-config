@@ -84,6 +84,11 @@ public sealed partial class SimplifyNameAnalyzer : DiagnosticAnalyzer
 
         foreach (var form in dottedName.GetForms(type))
         {
+            if (IsBrokenCast(node, form))
+            {
+                continue;
+            }
+
             var candidate = semanticModel.GetSpeculativeSymbolInfo(
                 node.SpanStart,
                 SyntaxFactory.ParseTypeName(dottedName.GetKeptText(form)),
@@ -116,6 +121,20 @@ public sealed partial class SimplifyNameAnalyzer : DiagnosticAnalyzer
         }
 
         return false;
+    }
+
+    private static bool IsBrokenCast(SyntaxNode node, NameForm form)
+    {
+        if (node.Parent is not CastExpressionSyntax cast || cast.Type != node)
+        {
+            return false;
+        }
+
+        var text = cast.ToString();
+        var removedStart = form.RemovedSpan.Start - cast.SpanStart;
+        var simplified = text.Remove(removedStart, form.RemovedSpan.Length);
+
+        return SyntaxFactory.ParseExpression(simplified) is not CastExpressionSyntax;
     }
 
     private static bool IsNamespaceDeclarationName(SyntaxNode node)
