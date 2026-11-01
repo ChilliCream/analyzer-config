@@ -39,6 +39,11 @@
       Pack="true"
       PackagePath="analyzers/dotnet/cs"
       Visible="false" />
+    <None
+      Include="../Analyzers.CodeFixes/$(OutputPath)ChilliCream.Analyzers.CodeFixes.dll"
+      Pack="true"
+      PackagePath="analyzers/dotnet/cs"
+      Visible="false" />
   </ItemGroup>
 
   <ItemGroup>
@@ -50,6 +55,10 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference
+      Include="../Analyzers.CodeFixes/Analyzers.CodeFixes.csproj"
+      PrivateAssets="all"
+      ReferenceOutputAssembly="false" />
     <ProjectReference
       Include="../Analyzers.Bootstrap/Analyzers.Bootstrap.csproj"
       OutputItemType="Analyzer"

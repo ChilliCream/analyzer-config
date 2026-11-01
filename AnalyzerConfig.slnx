@@ -1,6 +1,7 @@
 <Solution>
   <Folder Name="/src/">
     <Project Path="src/Analyzers/Analyzers.csproj" />
+    <Project Path="src/Analyzers.CodeFixes/Analyzers.CodeFixes.csproj" />
     <Project Path="src/Analyzers.Bootstrap/Analyzers.Bootstrap.csproj" />
     <Project Path="src/Libraries/Libraries.csproj" />
   </Folder>
