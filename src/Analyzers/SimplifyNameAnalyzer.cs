@@ -35,6 +35,7 @@ public sealed partial class SimplifyNameAnalyzer : DiagnosticAnalyzer
     {
         context.ConfigureGeneratedCodeAnalysis(GeneratedCodeAnalysisFlags.None);
         context.EnableConcurrentExecution();
+        context.RegisterSyntaxNodeAction(AnalyzeAttribute, SyntaxKind.Attribute);
         context.RegisterSyntaxNodeAction(
             AnalyzeDottedName,
             SyntaxKind.QualifiedName,
