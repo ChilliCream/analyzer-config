@@ -41,6 +41,7 @@ public sealed partial class SimplifyNameAnalyzer : DiagnosticAnalyzer
             SyntaxKind.QualifiedName,
             SyntaxKind.AliasQualifiedName,
             SyntaxKind.SimpleMemberAccessExpression);
+        context.RegisterSyntaxNodeAction(AnalyzeQualifiedCref, SyntaxKind.QualifiedCref);
     }
 
     private static void AnalyzeDottedName(SyntaxNodeAnalysisContext context)
@@ -88,13 +89,21 @@ public sealed partial class SimplifyNameAnalyzer : DiagnosticAnalyzer
                 return null;
         }
 
-        if (node.FirstAncestorOrSelf<DocumentationCommentTriviaSyntax>() is not null
-            || node.FirstAncestorOrSelf<UsingDirectiveSyntax>() is not null
+        if (node.FirstAncestorOrSelf<UsingDirectiveSyntax>() is not null
             || IsNamespaceDeclarationName(node)
             || node.ContainsDirectives
             || DottedName.Create(node) is not { } dottedName)
         {
             return null;
+        }
+
+        if (node.FirstAncestorOrSelf<CrefSyntax>() is not null)
+        {
+            return GetCrefSimplification(
+                semanticModel,
+                dottedName,
+                semanticModel.GetSymbolInfo(node, cancellationToken),
+                cancellationToken);
         }
 
         if (!SyntaxFacts.IsInNamespaceOrTypeContext((ExpressionSyntax)node))

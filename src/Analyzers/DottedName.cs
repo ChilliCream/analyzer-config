@@ -159,6 +159,19 @@ internal sealed class DottedName
 
                 return true;
 
+            case QualifiedCrefSyntax
+            {
+                Member: NameMemberCrefSyntax { Parameters: null, Name: SimpleNameSyntax name }
+            } qualifiedCref:
+                if (!TryAddSegments(qualifiedCref.Container, segments, ref alias))
+                {
+                    return false;
+                }
+
+                segments.Add(name);
+
+                return true;
+
             case AliasQualifiedNameSyntax aliasQualifiedName when segments.Count == 0:
                 alias = aliasQualifiedName;
                 segments.Add(aliasQualifiedName.Name);
