@@ -1,6 +1,9 @@
 using System.Collections.Immutable;
 using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Diagnostics;
+using Microsoft.CodeAnalysis.Text;
 
 namespace ChilliCream.Analyzers;
 
@@ -32,5 +35,94 @@ public sealed class SimplifyNameAnalyzer : DiagnosticAnalyzer
     {
         context.ConfigureGeneratedCodeAnalysis(GeneratedCodeAnalysisFlags.None);
         context.EnableConcurrentExecution();
+        context.RegisterSyntaxNodeAction(
+            AnalyzeDottedName,
+            SyntaxKind.QualifiedName,
+            SyntaxKind.AliasQualifiedName,
+            SyntaxKind.SimpleMemberAccessExpression);
+    }
+
+    private static void AnalyzeDottedName(SyntaxNodeAnalysisContext context)
+    {
+        var node = context.Node;
+
+        switch (node.Parent)
+        {
+            case QualifiedNameSyntax qualifiedName when qualifiedName.Left == node:
+            case MemberAccessExpressionSyntax memberAccess when memberAccess.Expression == node:
+            case AttributeSyntax:
+            case QualifiedCrefSyntax:
+                return;
+        }
+
+        if (node.FirstAncestorOrSelf<DocumentationCommentTriviaSyntax>() is not null
+            || node.ContainsDirectives
+            || DottedName.Create(node) is not { } dottedName)
+        {
+            return;
+        }
+
+        if (!SyntaxFacts.IsInNamespaceOrTypeContext((ExpressionSyntax)node))
+        {
+            return;
+        }
+
+        var cancellationToken = context.CancellationToken;
+        var semanticModel = context.SemanticModel;
+        var symbolInfo = semanticModel.GetSymbolInfo(node, cancellationToken);
+
+        if (symbolInfo.Symbol is not INamedTypeSymbol type
+            || type.TypeKind == TypeKind.Error
+            || !symbolInfo.CandidateSymbols.IsEmpty)
+        {
+            return;
+        }
+
+        foreach (var form in dottedName.GetForms(type))
+        {
+            var candidate = semanticModel.GetSpeculativeSymbolInfo(
+                node.SpanStart,
+                SyntaxFactory.ParseTypeName(dottedName.GetKeptText(form)),
+                SpeculativeBindingOption.BindAsTypeOrNamespace);
+
+            if (SymbolEqualityComparer.Default.Equals(candidate.Symbol, type))
+            {
+                if (!HasErrors(semanticModel, node.Span, cancellationToken))
+                {
+                    Report(context, form.RemovedSpan, dottedName.GetRemovedText(form));
+                }
+
+                return;
+            }
+        }
+    }
+
+    private static bool HasErrors(
+        SemanticModel semanticModel,
+        TextSpan span,
+        CancellationToken cancellationToken)
+    {
+        foreach (var diagnostic in semanticModel.GetDiagnostics(span, cancellationToken))
+        {
+            if (diagnostic.DefaultSeverity == DiagnosticSeverity.Error
+                && span.Contains(diagnostic.Location.SourceSpan))
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private static void Report(
+        SyntaxNodeAnalysisContext context,
+        TextSpan removedSpan,
+        string removedText)
+    {
+        context.ReportDiagnostic(
+            Diagnostic.Create(
+                s_rule,
+                Location.Create(context.Node.SyntaxTree, removedSpan),
+                removedText));
     }
 }
