@@ -4,6 +4,26 @@ on:
   pull_request:
 
 jobs:
+  spellcheck:
+    runs-on: ubuntu-26.04
+    permissions:
+      contents: read
+
+    steps:
+      - name: Check out code
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+
+      - name: Set up Node.js
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 24
+
+      - name: Install cspell
+        run: npm install --global cspell@10.4.0
+
+      - name: Check spelling
+        run: git ls-files | cspell --no-progress --file-list stdin
+
   test:
     runs-on: ubuntu-26.04
     permissions:
