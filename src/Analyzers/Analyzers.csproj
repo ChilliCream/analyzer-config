@@ -1,7 +1,10 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
+  <Import Project="../Libraries/build/ChilliCream.AnalyzerConfig.Libraries.props" />
+
   <PropertyGroup>
     <AssemblyName>ChilliCream.Analyzers</AssemblyName>
+    <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
     <EnforceExtendedAnalyzerRules>true</EnforceExtendedAnalyzerRules>
     <IsRoslynComponent>true</IsRoslynComponent>
     <PackageDescription>The ChilliCream analyzers for C# projects.</PackageDescription>
@@ -31,12 +34,29 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Include="$(OutputPath)$(AssemblyName).dll" Pack="true" PackagePath="analyzers/dotnet/cs" Visible="false" />
+    <None
+      Include="$(OutputPath)$(AssemblyName).dll"
+      Pack="true"
+      PackagePath="analyzers/dotnet/cs"
+      Visible="false" />
   </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="Microsoft.CodeAnalysis.Analyzers" PrivateAssets="all" />
     <PackageReference Include="Microsoft.CodeAnalysis.CSharp" PrivateAssets="all" />
+    <PackageReference Include="Roslynator.Analyzers" PrivateAssets="all" />
+    <PackageReference Include="Roslynator.CodeAnalysis.Analyzers" PrivateAssets="all" />
+    <PackageReference Include="Roslynator.Formatting.Analyzers" PrivateAssets="all" />
   </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference
+      Include="../Analyzers.Bootstrap/Analyzers.Bootstrap.csproj"
+      OutputItemType="Analyzer"
+      PrivateAssets="all"
+      ReferenceOutputAssembly="false" />
+  </ItemGroup>
+
+  <Import Project="../Libraries/build/ChilliCream.AnalyzerConfig.Libraries.targets" />
 
 </Project>
