@@ -3,7 +3,6 @@ using System.Composition;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CodeActions;
 using Microsoft.CodeAnalysis.CodeFixes;
-using Microsoft.CodeAnalysis.Text;
 
 namespace ChilliCream.Analyzers;
 
@@ -25,7 +24,7 @@ public sealed class SimplifyNameCodeFixProvider : CodeFixProvider
             context.RegisterCodeFix(
                 CodeAction.Create(
                     Resources.SimplifyNameCodeFixTitle,
-                    cancellationToken => RemoveAsync(
+                    cancellationToken => SpanRemover.RemoveAsync(
                         context.Document,
                         diagnostic.Location.SourceSpan,
                         cancellationToken),
@@ -34,15 +33,5 @@ public sealed class SimplifyNameCodeFixProvider : CodeFixProvider
         }
 
         return Task.CompletedTask;
-    }
-
-    private static async Task<Document> RemoveAsync(
-        Document document,
-        TextSpan span,
-        CancellationToken cancellationToken)
-    {
-        var text = await document.GetTextAsync(cancellationToken).ConfigureAwait(false);
-
-        return document.WithText(text.WithChanges(new TextChange(span, string.Empty)));
     }
 }
