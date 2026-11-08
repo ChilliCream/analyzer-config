@@ -6,3 +6,4 @@
 Rule ID | Category | Severity | Notes
 --------|----------|----------|-------
 CCA0001 | Style | Info | SimplifyNameAnalyzer
+CCA0002 | Style | Info | RemoveRedundantTypeArgumentsAnalyzer
