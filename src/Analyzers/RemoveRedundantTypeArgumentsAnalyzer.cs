@@ -73,6 +73,47 @@ public sealed class RemoveRedundantTypeArgumentsAnalyzer : DiagnosticAnalyzer
         }
     }
 
+    private static bool EnclosingExpressionsKeepBinding(
+        SemanticModel semanticModel,
+        SemanticModel speculativeModel,
+        InvocationExpressionSyntax invocation,
+        InvocationExpressionSyntax speculatedInvocation,
+        SyntaxNode root,
+        CancellationToken cancellationToken)
+    {
+        var comparer = SymbolEqualityComparer.IncludeNullability;
+        var original = invocation.Parent;
+        var speculated = speculatedInvocation.Parent;
+
+        while (original is not null && speculated is not null && original != root)
+        {
+            if (original is ExpressionSyntax)
+            {
+                var originalType = semanticModel.GetTypeInfo(original, cancellationToken);
+                var speculatedType = speculativeModel.GetTypeInfo(speculated, cancellationToken);
+
+                if (!comparer.Equals(originalType.Type, speculatedType.Type)
+                    || !comparer.Equals(originalType.ConvertedType, speculatedType.ConvertedType))
+                {
+                    return false;
+                }
+
+                if (original is not AnonymousFunctionExpressionSyntax
+                    && !comparer.Equals(
+                        semanticModel.GetSymbolInfo(original, cancellationToken).Symbol,
+                        speculativeModel.GetSymbolInfo(speculated, cancellationToken).Symbol))
+                {
+                    return false;
+                }
+            }
+
+            original = original.Parent;
+            speculated = speculated.Parent;
+        }
+
+        return true;
+    }
+
     private static GenericNameSyntax? GetGenericName(InvocationExpressionSyntax invocation)
     {
         return invocation.Expression switch
@@ -80,6 +121,52 @@ public sealed class RemoveRedundantTypeArgumentsAnalyzer : DiagnosticAnalyzer
             GenericNameSyntax name => name,
             MemberAccessExpressionSyntax { Name: GenericNameSyntax name } => name,
             MemberBindingExpressionSyntax { Name: GenericNameSyntax name } => name,
+            _ => null
+        };
+    }
+
+    private static SemanticModel? GetSpeculativeModel(
+        SemanticModel semanticModel,
+        int position,
+        SyntaxNode speculated)
+    {
+        return speculated switch
+        {
+            StatementSyntax statement =>
+                semanticModel.TryGetSpeculativeSemanticModel(
+                    position,
+                    statement,
+                    out var model)
+                    ? model
+                    : null,
+            EqualsValueClauseSyntax equalsValue =>
+                semanticModel.TryGetSpeculativeSemanticModel(
+                    position,
+                    equalsValue,
+                    out var model)
+                    ? model
+                    : null,
+            ArrowExpressionClauseSyntax arrow =>
+                semanticModel.TryGetSpeculativeSemanticModel(
+                    position,
+                    arrow,
+                    out var model)
+                    ? model
+                    : null,
+            ConstructorInitializerSyntax initializer =>
+                semanticModel.TryGetSpeculativeSemanticModel(
+                    position,
+                    initializer,
+                    out var model)
+                    ? model
+                    : null,
+            PrimaryConstructorBaseTypeSyntax baseType =>
+                semanticModel.TryGetSpeculativeSemanticModel(
+                    position,
+                    baseType,
+                    out var model)
+                    ? model
+                    : null,
             _ => null
         };
     }
@@ -98,6 +185,31 @@ public sealed class RemoveRedundantTypeArgumentsAnalyzer : DiagnosticAnalyzer
         return false;
     }
 
+    private static bool IsSpeculationRoot(SyntaxNode node)
+    {
+        return node switch
+        {
+            StatementSyntax => true,
+            EqualsValueClauseSyntax { Parent: PropertyDeclarationSyntax } => true,
+            EqualsValueClauseSyntax
+            {
+                Parent: VariableDeclaratorSyntax
+                {
+                    Parent: VariableDeclarationSyntax { Parent: BaseFieldDeclarationSyntax }
+                }
+            } => true,
+            ArrowExpressionClauseSyntax
+            {
+                Parent: BaseMethodDeclarationSyntax
+                    or BasePropertyDeclarationSyntax
+                    or AccessorDeclarationSyntax
+            } => true,
+            ConstructorInitializerSyntax => true,
+            PrimaryConstructorBaseTypeSyntax => true,
+            _ => false
+        };
+    }
+
     private static bool KeepsBinding(
         SemanticModel semanticModel,
         InvocationExpressionSyntax invocation,
@@ -110,14 +222,18 @@ public sealed class RemoveRedundantTypeArgumentsAnalyzer : DiagnosticAnalyzer
             .ReplaceNode(name, SyntaxFactory.IdentifierName(name.Identifier))
             .WithAdditionalAnnotations(annotation);
 
-        foreach (var statement in invocation.Ancestors().OfType<StatementSyntax>())
-        {
-            var speculated = statement.ReplaceNode(invocation, rewritten);
+        var start = invocation
+            .Ancestors()
+            .TakeWhile(node => node is not MemberDeclarationSyntax)
+            .LastOrDefault(node => node is AnonymousFunctionExpressionSyntax)
+            ?? invocation;
 
-            if (!semanticModel.TryGetSpeculativeSemanticModel(
-                statement.SpanStart,
-                speculated,
-                out var speculativeModel))
+        foreach (var root in start.Ancestors().Where(IsSpeculationRoot))
+        {
+            var speculated = root.ReplaceNode(invocation, rewritten);
+
+            if (GetSpeculativeModel(semanticModel, root.SpanStart, speculated)
+                is not { } speculativeModel)
             {
                 continue;
             }
@@ -129,7 +245,14 @@ public sealed class RemoveRedundantTypeArgumentsAnalyzer : DiagnosticAnalyzer
 
             return SymbolEqualityComparer.IncludeNullability.Equals(
                 speculativeModel.GetSymbolInfo(speculatedInvocation, cancellationToken).Symbol,
-                method);
+                method)
+                && EnclosingExpressionsKeepBinding(
+                    semanticModel,
+                    speculativeModel,
+                    invocation,
+                    speculatedInvocation,
+                    root,
+                    cancellationToken);
         }
 
         return false;
