@@ -57,32 +57,4 @@ public sealed partial class UseDeclaringTypeAnalyzer
 
         return false;
     }
-
-    private static bool KeepsBinding(
-        SemanticModel semanticModel,
-        Candidate candidate,
-        CancellationToken cancellationToken)
-    {
-        if (candidate.Node is not ExpressionSyntax node
-            || SpeculativeBinding.GetRoot(node) is not { } root)
-        {
-            return false;
-        }
-
-        var replacement = SyntaxFactory
-            .ParseExpression(candidate.Replacement)
-            .WithTriviaFrom(candidate.Qualifier);
-        List<SpeculativeRewrite> rewrites =
-        [
-            new(node, candidate.Qualifier, replacement, candidate.Member)
-        ];
-
-        SpeculativeBinding.DropRewritesThatChangeBinding(
-            semanticModel,
-            root,
-            rewrites,
-            cancellationToken);
-
-        return rewrites.Count == 1;
-    }
 }

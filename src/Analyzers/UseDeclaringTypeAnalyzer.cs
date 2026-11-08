@@ -41,22 +41,27 @@ public sealed partial class UseDeclaringTypeAnalyzer : DiagnosticAnalyzer
 
     private static void AnalyzeQualifiedAccess(SyntaxNodeAnalysisContext context)
     {
-        if (context.Node is QualifiedNameSyntax qualifiedName
-            ? qualifiedName.FirstAncestorOrSelf<CrefSyntax>() is not null
-            : IsInsideNameof(context.SemanticModel, context.Node, context.CancellationToken))
+        var node = context.Node;
+
+        if (node is QualifiedNameSyntax qualifiedName
+            && qualifiedName.FirstAncestorOrSelf<CrefSyntax>() is not null)
         {
             return;
         }
 
+        var insideNameof = node is MemberAccessExpressionSyntax
+            && IsInsideNameof(context.SemanticModel, node, context.CancellationToken);
+
         if (GetCandidate(
                 context.SemanticModel,
-                context.Node,
+                node,
+                insideNameof,
                 context.CancellationToken) is not { } candidate
-            || (context.Node is MemberAccessExpressionSyntax
-                && !KeepsBinding(
-                    context.SemanticModel,
-                    candidate,
-                    context.CancellationToken)))
+            || !IsReportable(
+                context.SemanticModel,
+                candidate,
+                insideNameof,
+                context.CancellationToken))
         {
             return;
         }
@@ -72,5 +77,22 @@ public sealed partial class UseDeclaringTypeAnalyzer : DiagnosticAnalyzer
                 properties,
                 candidate.Member.Name,
                 candidate.Replacement));
+    }
+
+    private static bool IsReportable(
+        SemanticModel semanticModel,
+        Candidate candidate,
+        bool insideNameof,
+        CancellationToken cancellationToken)
+    {
+        if (candidate.Node is QualifiedNameSyntax qualifiedName)
+        {
+            return !HasOuterTypeNameCandidate(semanticModel, qualifiedName, cancellationToken);
+        }
+
+        return insideNameof
+            ? NameofKeepsBinding(semanticModel, candidate, cancellationToken)
+                && !HasOuterNameofCandidate(semanticModel, candidate, cancellationToken)
+            : KeepsBinding(semanticModel, candidate, cancellationToken);
     }
 }

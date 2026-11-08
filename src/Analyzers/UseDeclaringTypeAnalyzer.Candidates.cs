@@ -29,6 +29,7 @@ public sealed partial class UseDeclaringTypeAnalyzer
     private static Candidate? GetCandidate(
         SemanticModel semanticModel,
         SyntaxNode node,
+        bool insideNameof,
         CancellationToken cancellationToken)
     {
         if (!TryGetParts(
@@ -52,9 +53,11 @@ public sealed partial class UseDeclaringTypeAnalyzer
         }
 
         var rightInfo = semanticModel.GetSymbolInfo(right, cancellationToken);
+        var member = insideNameof
+            ? GetNameofMember(semanticModel, node, rightInfo)
+            : rightInfo.CandidateSymbols.IsEmpty ? rightInfo.Symbol : null;
 
-        if (rightInfo.Symbol is not { ContainingType: { } declaringType } member
-            || !rightInfo.CandidateSymbols.IsEmpty
+        if (member is not { ContainingType: { } declaringType }
             || SymbolEqualityComparer.Default.Equals(declaringType, qualifierType)
             || declaringType.IsExtension
             || HasTypeArguments(declaringType)
