@@ -41,12 +41,22 @@ public sealed partial class UseDeclaringTypeAnalyzer : DiagnosticAnalyzer
 
     private static void AnalyzeQualifiedAccess(SyntaxNodeAnalysisContext context)
     {
-        if (context.Node is not QualifiedNameSyntax qualifiedName
-            || qualifiedName.FirstAncestorOrSelf<CrefSyntax>() is not null
-            || GetCandidate(
+        if (context.Node is QualifiedNameSyntax qualifiedName
+            ? qualifiedName.FirstAncestorOrSelf<CrefSyntax>() is not null
+            : IsInsideNameof(context.SemanticModel, context.Node, context.CancellationToken))
+        {
+            return;
+        }
+
+        if (GetCandidate(
                 context.SemanticModel,
-                qualifiedName,
-                context.CancellationToken) is not { } candidate)
+                context.Node,
+                context.CancellationToken) is not { } candidate
+            || (context.Node is MemberAccessExpressionSyntax
+                && !KeepsBinding(
+                    context.SemanticModel,
+                    candidate,
+                    context.CancellationToken)))
         {
             return;
         }

@@ -199,6 +199,22 @@ public sealed partial class UseDeclaringTypeAnalyzerTests
     }
 
     [Fact]
+    public async Task Analyze_Should_ReportNothing_When_TypeNameQualifierContainsComment()
+    {
+        // arrange
+        var source = WithLib(
+            """
+            class C
+            {
+                Lib./* keep */Derived.Nested item = null!;
+            }
+            """);
+
+        // act & assert
+        await VerifyAsync(source);
+    }
+
+    [Fact]
     public async Task Analyze_Should_ReportNothing_When_UsingAliasDirective()
     {
         // arrange

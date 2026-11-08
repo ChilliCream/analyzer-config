@@ -40,7 +40,7 @@ public sealed partial class UseDeclaringTypeAnalyzer
             return null;
         }
 
-        if (IsSkippedContext(node))
+        if (IsSkippedContext(node) || HasComment(qualifier))
         {
             return null;
         }
@@ -65,7 +65,8 @@ public sealed partial class UseDeclaringTypeAnalyzer
                 right,
                 declaringType,
                 member,
-                option) is not { } replacement
+                option,
+                cancellationToken) is not { } replacement
             || semanticModel.HasErrors(node.Span, cancellationToken))
         {
             return null;
@@ -104,19 +105,29 @@ public sealed partial class UseDeclaringTypeAnalyzer
         SimpleNameSyntax right,
         INamedTypeSymbol declaringType,
         ISymbol member,
-        SpeculativeBindingOption option)
+        SpeculativeBindingOption option,
+        CancellationToken cancellationToken)
     {
         var position = qualifier.SpanStart;
         var rightText = right.ToString();
 
         foreach (var form in GetForms(declaringType))
         {
+            var qualifierSyntax = Parse(form, option);
             var qualifierInfo = semanticModel.GetSpeculativeSymbolInfo(
                 position,
-                Parse(form, option),
+                qualifierSyntax,
                 option);
 
-            if (!SymbolEqualityComparer.Default.Equals(qualifierInfo.Symbol, declaringType))
+            if (!SymbolEqualityComparer.Default.Equals(qualifierInfo.Symbol, declaringType)
+                && (option != SpeculativeBindingOption.BindAsExpression
+                    || !IsColorColorForm(
+                        semanticModel,
+                        position,
+                        qualifierSyntax,
+                        qualifierInfo.Symbol,
+                        declaringType,
+                        cancellationToken)))
             {
                 continue;
             }
@@ -126,13 +137,30 @@ public sealed partial class UseDeclaringTypeAnalyzer
                 Parse($"{form}.{rightText}", option),
                 option);
 
-            if (SymbolEqualityComparer.Default.Equals(nameInfo.Symbol, member))
+            if (SymbolEqualityComparer.Default.Equals(nameInfo.Symbol, member)
+                || (option == SpeculativeBindingOption.BindAsExpression
+                    && HasCandidate(nameInfo, member)))
             {
                 return form;
             }
         }
 
         return null;
+    }
+
+    private static bool HasCandidate(SymbolInfo info, ISymbol member)
+    {
+        var original = member.OriginalDefinition;
+
+        foreach (var candidate in info.CandidateSymbols)
+        {
+            if (SymbolEqualityComparer.Default.Equals(candidate.OriginalDefinition, original))
+            {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     private static bool HasTypeArguments(INamedTypeSymbol type)
