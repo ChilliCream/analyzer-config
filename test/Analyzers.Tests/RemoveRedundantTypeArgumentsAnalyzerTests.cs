@@ -1,4 +1,5 @@
 using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Testing;
 using Microsoft.CodeAnalysis.Testing;
 
@@ -263,8 +264,26 @@ public sealed partial class RemoveRedundantTypeArgumentsAnalyzerTests
         };
     }
 
+    private static CSharpAnalyzerTest<RemoveRedundantTypeArgumentsAnalyzer, DefaultVerifier>
+        CreateTest(string source, NullableContextOptions nullable)
+    {
+        var test = CreateTest(source);
+        test.SolutionTransforms.Add(
+            (solution, projectId) => solution.WithProjectCompilationOptions(
+                projectId,
+                ((CSharpCompilationOptions)solution.GetProject(projectId)!.CompilationOptions!)
+                    .WithNullableContextOptions(nullable)));
+
+        return test;
+    }
+
     private static Task VerifyAsync(string source)
     {
         return CreateTest(source).RunAsync(TestContext.Current.CancellationToken);
+    }
+
+    private static Task VerifyAsync(string source, NullableContextOptions nullable)
+    {
+        return CreateTest(source, nullable).RunAsync(TestContext.Current.CancellationToken);
     }
 }

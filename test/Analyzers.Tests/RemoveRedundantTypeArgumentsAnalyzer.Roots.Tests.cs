@@ -4,8 +4,12 @@ namespace ChilliCream.Analyzers.Tests;
 
 public sealed partial class RemoveRedundantTypeArgumentsAnalyzerTests
 {
-    [Fact]
-    public async Task Analyze_Should_ReportNothing_When_LocalFunctionTypeParameterInExpressionBody()
+    [Theory]
+    [InlineData(NullableContextOptions.Disable)]
+    [InlineData(NullableContextOptions.Enable)]
+    public async Task
+        Analyze_Should_ReportNothing_When_LocalFunctionTypeParameterInExpressionBody(
+            NullableContextOptions nullable)
     {
         // arrange
         const string source =
@@ -25,11 +29,15 @@ public sealed partial class RemoveRedundantTypeArgumentsAnalyzerTests
             """;
 
         // act & assert
-        await VerifyAsync(source);
+        await VerifyAsync(source, nullable);
     }
 
-    [Fact]
-    public async Task Analyze_Should_ReportNothing_When_RecursiveLocalFunctionCall()
+    [Theory]
+    [InlineData(NullableContextOptions.Disable)]
+    [InlineData(NullableContextOptions.Enable)]
+    public async Task
+        Analyze_Should_ReportNothing_When_RecursiveLocalFunctionCall(
+            NullableContextOptions nullable)
     {
         // arrange
         const string source =
@@ -45,11 +53,14 @@ public sealed partial class RemoveRedundantTypeArgumentsAnalyzerTests
             """;
 
         // act & assert
-        await VerifyAsync(source);
+        await VerifyAsync(source, nullable);
     }
 
-    [Fact]
-    public async Task Analyze_Should_ReportTypeArgumentList_When_AnonymousMethod()
+    [Theory]
+    [InlineData(NullableContextOptions.Disable)]
+    [InlineData(NullableContextOptions.Enable)]
+    public async Task
+        Analyze_Should_ReportTypeArgumentList_When_AnonymousMethod(NullableContextOptions nullable)
     {
         // arrange
         const string source =
@@ -71,11 +82,15 @@ public sealed partial class RemoveRedundantTypeArgumentsAnalyzerTests
             """;
 
         // act & assert
-        await VerifyAsync(source);
+        await VerifyAsync(source, nullable);
     }
 
-    [Fact]
-    public async Task Analyze_Should_ReportTypeArgumentList_When_BlockLambdaInFieldInitializer()
+    [Theory]
+    [InlineData(NullableContextOptions.Disable)]
+    [InlineData(NullableContextOptions.Enable)]
+    public async Task
+        Analyze_Should_ReportTypeArgumentList_When_BlockLambdaInFieldInitializer(
+            NullableContextOptions nullable)
     {
         // arrange
         const string source =
@@ -94,11 +109,15 @@ public sealed partial class RemoveRedundantTypeArgumentsAnalyzerTests
             """;
 
         // act & assert
-        await VerifyAsync(source);
+        await VerifyAsync(source, nullable);
     }
 
-    [Fact]
-    public async Task Analyze_Should_ReportTypeArgumentList_When_BlockLambdaInMethod()
+    [Theory]
+    [InlineData(NullableContextOptions.Disable)]
+    [InlineData(NullableContextOptions.Enable)]
+    public async Task
+        Analyze_Should_ReportTypeArgumentList_When_BlockLambdaInMethod(
+            NullableContextOptions nullable)
     {
         // arrange
         const string source =
@@ -122,11 +141,15 @@ public sealed partial class RemoveRedundantTypeArgumentsAnalyzerTests
             """;
 
         // act & assert
-        await VerifyAsync(source);
+        await VerifyAsync(source, nullable);
     }
 
-    [Fact]
-    public async Task Analyze_Should_ReportTypeArgumentList_When_ConstructorInitializer()
+    [Theory]
+    [InlineData(NullableContextOptions.Disable)]
+    [InlineData(NullableContextOptions.Enable)]
+    public async Task
+        Analyze_Should_ReportTypeArgumentList_When_ConstructorInitializer(
+            NullableContextOptions nullable)
     {
         // arrange
         const string source =
@@ -152,11 +175,15 @@ public sealed partial class RemoveRedundantTypeArgumentsAnalyzerTests
             """;
 
         // act & assert
-        await VerifyAsync(source);
+        await VerifyAsync(source, nullable);
     }
 
-    [Fact]
-    public async Task Analyze_Should_ReportTypeArgumentList_When_ExpressionBodiedAccessor()
+    [Theory]
+    [InlineData(NullableContextOptions.Disable)]
+    [InlineData(NullableContextOptions.Enable)]
+    public async Task
+        Analyze_Should_ReportTypeArgumentList_When_ExpressionBodiedAccessor(
+            NullableContextOptions nullable)
     {
         // arrange
         const string source =
@@ -173,11 +200,15 @@ public sealed partial class RemoveRedundantTypeArgumentsAnalyzerTests
             """;
 
         // act & assert
-        await VerifyAsync(source);
+        await VerifyAsync(source, nullable);
     }
 
-    [Fact]
-    public async Task Analyze_Should_ReportTypeArgumentList_When_ExpressionBodiedMethod()
+    [Theory]
+    [InlineData(NullableContextOptions.Disable)]
+    [InlineData(NullableContextOptions.Enable)]
+    public async Task
+        Analyze_Should_ReportTypeArgumentList_When_ExpressionBodiedMethod(
+            NullableContextOptions nullable)
     {
         // arrange
         const string source =
@@ -194,11 +225,15 @@ public sealed partial class RemoveRedundantTypeArgumentsAnalyzerTests
             """;
 
         // act & assert
-        await VerifyAsync(source);
+        await VerifyAsync(source, nullable);
     }
 
-    [Fact]
-    public async Task Analyze_Should_ReportTypeArgumentList_When_ExpressionBodiedProperty()
+    [Theory]
+    [InlineData(NullableContextOptions.Disable)]
+    [InlineData(NullableContextOptions.Enable)]
+    public async Task
+        Analyze_Should_ReportTypeArgumentList_When_ExpressionBodiedProperty(
+            NullableContextOptions nullable)
     {
         // arrange
         const string source =
@@ -215,11 +250,14 @@ public sealed partial class RemoveRedundantTypeArgumentsAnalyzerTests
             """;
 
         // act & assert
-        await VerifyAsync(source);
+        await VerifyAsync(source, nullable);
     }
 
-    [Fact]
-    public async Task Analyze_Should_ReportTypeArgumentList_When_FieldInitializer()
+    [Theory]
+    [InlineData(NullableContextOptions.Disable)]
+    [InlineData(NullableContextOptions.Enable)]
+    public async Task
+        Analyze_Should_ReportTypeArgumentList_When_FieldInitializer(NullableContextOptions nullable)
     {
         // arrange
         const string source =
@@ -236,11 +274,15 @@ public sealed partial class RemoveRedundantTypeArgumentsAnalyzerTests
             """;
 
         // act & assert
-        await VerifyAsync(source);
+        await VerifyAsync(source, nullable);
     }
 
-    [Fact]
-    public async Task Analyze_Should_ReportTypeArgumentList_When_LambdaInsideLambda()
+    [Theory]
+    [InlineData(NullableContextOptions.Disable)]
+    [InlineData(NullableContextOptions.Enable)]
+    public async Task
+        Analyze_Should_ReportTypeArgumentList_When_LambdaInsideLambda(
+            NullableContextOptions nullable)
     {
         // arrange
         const string source =
@@ -264,11 +306,15 @@ public sealed partial class RemoveRedundantTypeArgumentsAnalyzerTests
             """;
 
         // act & assert
-        await VerifyAsync(source);
+        await VerifyAsync(source, nullable);
     }
 
-    [Fact]
-    public async Task Analyze_Should_ReportTypeArgumentList_When_LocalFunctionExpressionBody()
+    [Theory]
+    [InlineData(NullableContextOptions.Disable)]
+    [InlineData(NullableContextOptions.Enable)]
+    public async Task
+        Analyze_Should_ReportTypeArgumentList_When_LocalFunctionExpressionBody(
+            NullableContextOptions nullable)
     {
         // arrange
         const string source =
@@ -288,11 +334,15 @@ public sealed partial class RemoveRedundantTypeArgumentsAnalyzerTests
             """;
 
         // act & assert
-        await VerifyAsync(source);
+        await VerifyAsync(source, nullable);
     }
 
-    [Fact]
-    public async Task Analyze_Should_ReportTypeArgumentList_When_PrimaryConstructorBase()
+    [Theory]
+    [InlineData(NullableContextOptions.Disable)]
+    [InlineData(NullableContextOptions.Enable)]
+    public async Task
+        Analyze_Should_ReportTypeArgumentList_When_PrimaryConstructorBase(
+            NullableContextOptions nullable)
     {
         // arrange
         const string source =
@@ -308,11 +358,15 @@ public sealed partial class RemoveRedundantTypeArgumentsAnalyzerTests
             """;
 
         // act & assert
-        await VerifyAsync(source);
+        await VerifyAsync(source, nullable);
     }
 
-    [Fact]
-    public async Task Analyze_Should_ReportTypeArgumentList_When_PropertyInitializer()
+    [Theory]
+    [InlineData(NullableContextOptions.Disable)]
+    [InlineData(NullableContextOptions.Enable)]
+    public async Task
+        Analyze_Should_ReportTypeArgumentList_When_PropertyInitializer(
+            NullableContextOptions nullable)
     {
         // arrange
         const string source =
@@ -329,11 +383,15 @@ public sealed partial class RemoveRedundantTypeArgumentsAnalyzerTests
             """;
 
         // act & assert
-        await VerifyAsync(source);
+        await VerifyAsync(source, nullable);
     }
 
-    [Fact]
-    public async Task Analyze_Should_ReportTypeArgumentList_When_QueryExpressionSource()
+    [Theory]
+    [InlineData(NullableContextOptions.Disable)]
+    [InlineData(NullableContextOptions.Enable)]
+    public async Task
+        Analyze_Should_ReportTypeArgumentList_When_QueryExpressionSource(
+            NullableContextOptions nullable)
     {
         // arrange
         const string source =
@@ -355,11 +413,15 @@ public sealed partial class RemoveRedundantTypeArgumentsAnalyzerTests
             """;
 
         // act & assert
-        await VerifyAsync(source);
+        await VerifyAsync(source, nullable);
     }
 
-    [Fact]
-    public async Task Analyze_Should_ReportTypeArgumentList_When_SwitchExpressionArm()
+    [Theory]
+    [InlineData(NullableContextOptions.Disable)]
+    [InlineData(NullableContextOptions.Enable)]
+    public async Task
+        Analyze_Should_ReportTypeArgumentList_When_SwitchExpressionArm(
+            NullableContextOptions nullable)
     {
         // arrange
         const string source =
@@ -379,11 +441,15 @@ public sealed partial class RemoveRedundantTypeArgumentsAnalyzerTests
             """;
 
         // act & assert
-        await VerifyAsync(source);
+        await VerifyAsync(source, nullable);
     }
 
-    [Fact]
-    public async Task Analyze_Should_ReportTypeArgumentList_When_TopLevelStatement()
+    [Theory]
+    [InlineData(NullableContextOptions.Disable)]
+    [InlineData(NullableContextOptions.Enable)]
+    public async Task
+        Analyze_Should_ReportTypeArgumentList_When_TopLevelStatement(
+            NullableContextOptions nullable)
     {
         // arrange
         const string source =
@@ -393,7 +459,7 @@ public sealed partial class RemoveRedundantTypeArgumentsAnalyzerTests
             var name = Id[|<string>|]("x");
             """;
 
-        var test = CreateTest(source);
+        var test = CreateTest(source, nullable);
         test.TestState.OutputKind = OutputKind.ConsoleApplication;
 
         // act & assert
