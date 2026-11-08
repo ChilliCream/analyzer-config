@@ -55,6 +55,7 @@ public sealed class RemoveRedundantTypeArgumentsAnalyzer : DiagnosticAnalyzer
         }
 
         if (!method.TypeArguments.All(TypeArgumentFilter.Qualifies)
+            || !TypeArgumentInference.CanInfer(method)
             || HasNonWhitespaceTrivia(name.TypeArgumentList)
             || semanticModel.HasErrors(invocation.Span, context.CancellationToken))
         {
