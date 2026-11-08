@@ -45,6 +45,12 @@ namespace ChilliCream.Analyzers {
             }
         }
 
+        internal static string RemoveRedundantTypeArgumentsCodeFixTitle {
+            get {
+                return ResourceManager.GetString("RemoveRedundantTypeArgumentsCodeFixTitle", resourceCulture);
+            }
+        }
+
         internal static string SimplifyNameCodeFixTitle {
             get {
                 return ResourceManager.GetString("SimplifyNameCodeFixTitle", resourceCulture);

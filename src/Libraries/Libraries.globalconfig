@@ -7,6 +7,8 @@ is_global = true
 dotnet_diagnostic.CCA0001.severity = warning
 dotnet_diagnostic.IDE0001.severity = none
 dotnet_diagnostic.IDE0002.severity = none
+# Remove redundant type arguments.
+dotnet_diagnostic.CCA0002.severity = warning
 
 ## Quality rules ##
 # https://docs.microsoft.com/en-us/dotnet/fundamentals/code-analysis/quality-rules
