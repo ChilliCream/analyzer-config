@@ -9,10 +9,6 @@ public sealed partial class RemoveRedundantTypeArgumentsAnalyzerTests
         const string source =
             """
             #nullable enable annotations
-            using System;
-            using System.Collections.Generic;
-            using System.Threading.Tasks;
-
             class C
             {
                 static T Id<T>(T value) => value;
@@ -35,10 +31,6 @@ public sealed partial class RemoveRedundantTypeArgumentsAnalyzerTests
         const string source =
             """
             #nullable enable
-            using System;
-            using System.Collections.Generic;
-            using System.Threading.Tasks;
-
             class C
             {
                 static T Id<T>(T value) => value;
@@ -64,8 +56,6 @@ public sealed partial class RemoveRedundantTypeArgumentsAnalyzerTests
             """
             #nullable enable
             using System;
-            using System.Collections.Generic;
-            using System.Threading.Tasks;
 
             class C
             {
@@ -92,8 +82,6 @@ public sealed partial class RemoveRedundantTypeArgumentsAnalyzerTests
             """
             #nullable enable
             using System;
-            using System.Collections.Generic;
-            using System.Threading.Tasks;
 
             class C
             {
@@ -119,10 +107,6 @@ public sealed partial class RemoveRedundantTypeArgumentsAnalyzerTests
         const string source =
             """
             #nullable enable annotations
-            using System;
-            using System.Collections.Generic;
-            using System.Threading.Tasks;
-
             class C
             {
                 static T Id<T>(T value) => value;
@@ -146,8 +130,6 @@ public sealed partial class RemoveRedundantTypeArgumentsAnalyzerTests
         const string source =
             """
             #nullable enable
-            using System;
-            using System.Collections.Generic;
             using System.Threading.Tasks;
 
             class C
@@ -172,10 +154,6 @@ public sealed partial class RemoveRedundantTypeArgumentsAnalyzerTests
         const string source =
             """
             #nullable enable
-            using System;
-            using System.Collections.Generic;
-            using System.Threading.Tasks;
-
             class C
             {
                 static T Id<T>(T value) => value;
@@ -198,10 +176,6 @@ public sealed partial class RemoveRedundantTypeArgumentsAnalyzerTests
         const string source =
             """
             #nullable enable
-            using System;
-            using System.Collections.Generic;
-            using System.Threading.Tasks;
-
             class C
             {
                 static T Id<T>(T value) => value;
@@ -225,8 +199,6 @@ public sealed partial class RemoveRedundantTypeArgumentsAnalyzerTests
             """
             #nullable enable
             using System;
-            using System.Collections.Generic;
-            using System.Threading.Tasks;
 
             class C
             {
@@ -252,9 +224,7 @@ public sealed partial class RemoveRedundantTypeArgumentsAnalyzerTests
         const string source =
             """
             #nullable enable
-            using System;
             using System.Collections.Generic;
-            using System.Threading.Tasks;
 
             class C
             {
@@ -278,10 +248,6 @@ public sealed partial class RemoveRedundantTypeArgumentsAnalyzerTests
         const string source =
             """
             #nullable enable
-            using System;
-            using System.Collections.Generic;
-            using System.Threading.Tasks;
-
             class C
             {
                 static T Id<T>(T value) => value;
@@ -309,10 +275,6 @@ public sealed partial class RemoveRedundantTypeArgumentsAnalyzerTests
         const string source =
             """
             #nullable enable
-            using System;
-            using System.Collections.Generic;
-            using System.Threading.Tasks;
-
             class C
             {
                 static T Id<T>(T value) => value;
@@ -339,10 +301,6 @@ public sealed partial class RemoveRedundantTypeArgumentsAnalyzerTests
         const string source =
             """
             #nullable enable
-            using System;
-            using System.Collections.Generic;
-            using System.Threading.Tasks;
-
             class C
             {
                 static T Id<T>(T value) => value;
@@ -365,10 +323,6 @@ public sealed partial class RemoveRedundantTypeArgumentsAnalyzerTests
         const string source =
             """
             #nullable disable
-            using System;
-            using System.Collections.Generic;
-            using System.Threading.Tasks;
-
             class C
             {
                 static T Id<T>(T value) => value;

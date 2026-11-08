@@ -101,7 +101,7 @@ public sealed partial class SimplifyNameAnalyzer
                 continue;
             }
 
-            hasErrors ??= HasErrors(semanticModel, examined.Span, cancellationToken);
+            hasErrors ??= semanticModel.HasErrors(examined.Span, cancellationToken);
 
             if (hasErrors.Value)
             {

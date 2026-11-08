@@ -139,7 +139,7 @@ public sealed partial class SimplifyNameAnalyzer : DiagnosticAnalyzer
                 continue;
             }
 
-            hasErrors ??= HasErrors(semanticModel, node.Span, cancellationToken);
+            hasErrors ??= semanticModel.HasErrors(node.Span, cancellationToken);
 
             if (hasErrors.Value)
             {
@@ -159,23 +159,6 @@ public sealed partial class SimplifyNameAnalyzer : DiagnosticAnalyzer
         }
 
         return null;
-    }
-
-    private static bool HasErrors(
-        SemanticModel semanticModel,
-        TextSpan span,
-        CancellationToken cancellationToken)
-    {
-        foreach (var diagnostic in semanticModel.GetDiagnostics(span, cancellationToken))
-        {
-            if (diagnostic.DefaultSeverity == DiagnosticSeverity.Error
-                && span.Contains(diagnostic.Location.SourceSpan))
-            {
-                return true;
-            }
-        }
-
-        return false;
     }
 
     private static bool IsBrokenCast(SyntaxNode node, NameForm form)

@@ -54,6 +54,13 @@ public sealed class RemoveRedundantTypeArgumentsAnalyzer : DiagnosticAnalyzer
             return;
         }
 
+        if (!method.TypeArguments.All(TypeArgumentFilter.Qualifies)
+            || HasNonWhitespaceTrivia(name.TypeArgumentList)
+            || semanticModel.HasErrors(invocation.Span, context.CancellationToken))
+        {
+            return;
+        }
+
         if (KeepsBinding(semanticModel, invocation, name, method, context.CancellationToken))
         {
             var typeArgumentList = name.TypeArgumentList;
@@ -75,6 +82,20 @@ public sealed class RemoveRedundantTypeArgumentsAnalyzer : DiagnosticAnalyzer
             MemberBindingExpressionSyntax { Name: GenericNameSyntax name } => name,
             _ => null
         };
+    }
+
+    private static bool HasNonWhitespaceTrivia(TypeArgumentListSyntax typeArgumentList)
+    {
+        foreach (var trivia in typeArgumentList.DescendantTrivia())
+        {
+            if (!trivia.IsKind(SyntaxKind.WhitespaceTrivia)
+                && !trivia.IsKind(SyntaxKind.EndOfLineTrivia))
+            {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     private static bool KeepsBinding(

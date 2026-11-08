@@ -51,7 +51,7 @@ public sealed partial class SimplifyNameAnalyzer
                 continue;
             }
 
-            hasErrors ??= HasErrors(context.SemanticModel, name.Span, context.CancellationToken);
+            hasErrors ??= context.SemanticModel.HasErrors(name.Span, context.CancellationToken);
 
             if (hasErrors.Value)
             {
@@ -85,7 +85,7 @@ public sealed partial class SimplifyNameAnalyzer
             return;
         }
 
-        hasErrors ??= HasErrors(context.SemanticModel, name.Span, context.CancellationToken);
+        hasErrors ??= context.SemanticModel.HasErrors(name.Span, context.CancellationToken);
 
         if (!hasErrors.Value)
         {
