@@ -337,4 +337,27 @@ public sealed partial class RemoveRedundantTypeArgumentsAnalyzerTests
         // act & assert
         await VerifyAsync(source);
     }
+
+    [Fact]
+    public async Task
+        Analyze_Should_ReportTypeArgumentList_When_ValueTypeArgumentAndNoNullableWarningsEnabled()
+    {
+        // arrange
+        const string source =
+            """
+            #nullable enable annotations
+            class C
+            {
+                static T Id<T>(T value) => value;
+
+                void M()
+                {
+                    var x = Id[|<int>|](1);
+                }
+            }
+            """;
+
+        // act & assert
+        await VerifyAsync(source);
+    }
 }

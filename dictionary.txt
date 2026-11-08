@@ -1,6 +1,7 @@
 accessibilities
 crefs
 globalconfig
+Linq
 netstandard
 resharper
 resheader

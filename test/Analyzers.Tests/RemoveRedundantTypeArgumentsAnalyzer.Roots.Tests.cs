@@ -5,6 +5,30 @@ namespace ChilliCream.Analyzers.Tests;
 public sealed partial class RemoveRedundantTypeArgumentsAnalyzerTests
 {
     [Fact]
+    public async Task Analyze_Should_ReportNothing_When_LocalFunctionTypeParameterInExpressionBody()
+    {
+        // arrange
+        const string source =
+            """
+            class C
+            {
+                void M()
+                {
+                    static T Wrap<T>(T value) where T : struct => H.Id<T>(value);
+                }
+            }
+
+            static class H
+            {
+                public static T Id<T>(T value) => value;
+            }
+            """;
+
+        // act & assert
+        await VerifyAsync(source);
+    }
+
+    [Fact]
     public async Task Analyze_Should_ReportNothing_When_RecursiveLocalFunctionCall()
     {
         // arrange
