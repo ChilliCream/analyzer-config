@@ -6,6 +6,7 @@ namespace ChilliCream.Analyzers;
 
 internal static class SpeculativeBinding
 {
+    // Each rewrite's Target lies strictly inside its Node, and no two Targets overlap.
     public static bool DropRewritesThatChangeBinding(
         SemanticModel semanticModel,
         SyntaxNode root,

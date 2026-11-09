@@ -29,6 +29,22 @@ internal static class SemanticModelExtensions
             return SymbolEqualityComparer.Default.Equals(rebound.Symbol, symbol);
         }
 
+        public ITypeSymbol? GetColorColorType(
+            ISymbol? receiver,
+            int position,
+            string text,
+            CancellationToken cancellationToken)
+        {
+            var receiverType = receiver.GetReceiverType(position, cancellationToken);
+
+            if (receiverType is null || !semanticModel.BindsAsType(position, text, receiverType))
+            {
+                return null;
+            }
+
+            return receiverType;
+        }
+
         public ISymbol? GetCrefSymbol(CrefSyntax topCref, CancellationToken cancellationToken)
         {
             var info = semanticModel.GetSymbolInfo(topCref, cancellationToken);
@@ -53,6 +69,13 @@ internal static class SemanticModelExtensions
         public bool IsDiagnosticDisabled(string diagnosticId, CancellationToken cancellationToken)
         {
             var options = semanticModel.Compilation.Options;
+
+            if (options.SpecificDiagnosticOptions.TryGetValue(diagnosticId, out var specific)
+                && specific == ReportDiagnostic.Suppress)
+            {
+                return true;
+            }
+
             var provider = options.SyntaxTreeOptionsProvider;
 
             if (provider is not null)
@@ -75,8 +98,7 @@ internal static class SemanticModelExtensions
                 }
             }
 
-            return options.SpecificDiagnosticOptions.TryGetValue(diagnosticId, out var specific)
-                && specific == ReportDiagnostic.Suppress;
+            return false;
         }
     }
 }

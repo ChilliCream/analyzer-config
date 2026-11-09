@@ -37,16 +37,6 @@ public sealed partial class UseDeclaringTypeAnalyzer
         return candidates;
     }
 
-    private static HashSet<SyntaxNode> GetProvenNodes(
-        SemanticModel semanticModel,
-        SyntaxNode root,
-        CancellationToken cancellationToken)
-    {
-        return CollectCandidates(semanticModel, root, cancellationToken) is { Count: > 0 } all
-            ? new CandidateProof(semanticModel, root, all, cancellationToken).Prove()
-            : [];
-    }
-
     private static bool KeepsBinding(
         SemanticModel semanticModel,
         Candidate candidate,
@@ -54,6 +44,9 @@ public sealed partial class UseDeclaringTypeAnalyzer
     {
         return candidate.Node is ExpressionSyntax node
             && SpeculativeBinding.GetRoot(node) is { } root
-            && GetProvenNodes(semanticModel, root, cancellationToken).Contains(node);
+            && CollectCandidates(semanticModel, root, cancellationToken) is { Count: > 0 } all
+            && new CandidateProof(semanticModel, root, all, cancellationToken)
+                .Prove()
+                .Contains(node);
     }
 }

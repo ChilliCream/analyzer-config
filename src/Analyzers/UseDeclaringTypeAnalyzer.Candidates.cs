@@ -7,6 +7,11 @@ namespace ChilliCream.Analyzers;
 
 public sealed partial class UseDeclaringTypeAnalyzer
 {
+    private const string ExperimentalAttributeName =
+        "System.Diagnostics.CodeAnalysis.ExperimentalAttribute";
+
+    private const string ObsoleteAttributeName = "System.ObsoleteAttribute";
+
     private static readonly SymbolDisplayFormat[] s_formats =
     [
         new(
@@ -62,6 +67,7 @@ public sealed partial class UseDeclaringTypeAnalyzer
             || declaringType.IsExtension
             || HasTypeArguments(declaringType)
             || IsHiddenFromEditor(declaringType)
+            || IsObsoleteOrExperimental(declaringType)
             || GetReplacement(
                 semanticModel,
                 qualifier,
@@ -133,13 +139,14 @@ public sealed partial class UseDeclaringTypeAnalyzer
 
             if (!SymbolEqualityComparer.Default.Equals(qualifierInfo.Symbol, declaringType)
                 && (option != SpeculativeBindingOption.BindAsExpression
-                    || !IsColorColorForm(
-                        semanticModel,
-                        position,
-                        qualifierSyntax,
-                        qualifierInfo.Symbol,
-                        declaringType,
-                        cancellationToken)))
+                    || qualifierSyntax is not SimpleNameSyntax
+                    || !SymbolEqualityComparer.Default.Equals(
+                        semanticModel.GetColorColorType(
+                            qualifierInfo.Symbol,
+                            position,
+                            form,
+                            cancellationToken),
+                        declaringType)))
             {
                 continue;
             }
@@ -167,6 +174,22 @@ public sealed partial class UseDeclaringTypeAnalyzer
         foreach (var candidate in info.CandidateSymbols)
         {
             if (SymbolEqualityComparer.Default.Equals(candidate.OriginalDefinition, original))
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private static bool HasComment(ExpressionSyntax qualifier)
+    {
+        foreach (var trivia in qualifier.DescendantTrivia(qualifier.Span))
+        {
+            if (trivia.IsKind(SyntaxKind.SingleLineCommentTrivia)
+                || trivia.IsKind(SyntaxKind.MultiLineCommentTrivia)
+                || trivia.IsKind(SyntaxKind.SingleLineDocumentationCommentTrivia)
+                || trivia.IsKind(SyntaxKind.MultiLineDocumentationCommentTrivia))
             {
                 return true;
             }
@@ -208,6 +231,26 @@ public sealed partial class UseDeclaringTypeAnalyzer
                 && attribute.ConstructorArguments.Length == 1
                 && attribute.ConstructorArguments[0].Value is (int)EditorBrowsableState.Never
                     or (int)EditorBrowsableState.Advanced)
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private static bool IsObsoleteOrExperimental(INamedTypeSymbol type)
+    {
+        if (type.ContainingAssembly.HasAttribute(ExperimentalAttributeName)
+            || type.ContainingModule.HasAttribute(ExperimentalAttributeName))
+        {
+            return true;
+        }
+
+        for (var current = type; current is not null; current = current.ContainingType)
+        {
+            if (current.HasAttribute(ObsoleteAttributeName)
+                || current.HasAttribute(ExperimentalAttributeName))
             {
                 return true;
             }

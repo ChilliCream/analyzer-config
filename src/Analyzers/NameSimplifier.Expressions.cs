@@ -77,12 +77,11 @@ internal static partial class NameSimplifier
 
             if (form.FirstKept != simpleName
                 && firstKeptSymbol is not INamespaceOrTypeSymbol
-                && !IsColorColorQualifier(
-                    semanticModel,
-                    examined.SpanStart,
-                    form.FirstKept,
+                && semanticModel.GetColorColorType(
                     firstKeptSymbol,
-                    cancellationToken))
+                    examined.SpanStart,
+                    form.FirstKept.ToString(),
+                    cancellationToken) is null)
             {
                 continue;
             }
@@ -107,19 +106,6 @@ internal static partial class NameSimplifier
         }
 
         return null;
-    }
-
-    private static bool IsColorColorQualifier(
-        SemanticModel semanticModel,
-        int position,
-        SimpleNameSyntax qualifier,
-        ISymbol? receiver,
-        CancellationToken cancellationToken)
-    {
-        var receiverType = receiver.GetReceiverType(position, cancellationToken);
-
-        return receiverType is not null
-            && semanticModel.BindsAsType(position, qualifier.ToString(), receiverType);
     }
 
     private static bool IsColorColorReceiver(

@@ -6,6 +6,25 @@ namespace ChilliCream.Analyzers.Tests;
 public sealed partial class UseDeclaringTypeAnalyzerTests
 {
     [Fact]
+    public async Task Analyze_Should_ReportNothing_When_SimplifyNameDisabledByPragma()
+    {
+        // arrange
+        var source = WithLib(
+            """
+            #pragma warning disable CCA0001
+            using Lib;
+
+            class Sub : Base
+            {
+                Derived.Nested item = null!;
+            }
+            """);
+
+        // act & assert
+        await VerifyAsync(source);
+    }
+
+    [Fact]
     public async Task Analyze_Should_ReportNothing_When_SimplifyNameRemovesCrefParameterQualifier()
     {
         // arrange
@@ -84,25 +103,6 @@ public sealed partial class UseDeclaringTypeAnalyzerTests
         // arrange
         var source = WithLib(
             """
-            using Lib;
-
-            class Sub : Base
-            {
-                Derived.Nested item = null!;
-            }
-            """);
-
-        // act & assert
-        await VerifyAsync(source);
-    }
-
-    [Fact]
-    public async Task Analyze_Should_ReportNothing_When_SimplifyNameDisabledByPragma()
-    {
-        // arrange
-        var source = WithLib(
-            """
-            #pragma warning disable CCA0001
             using Lib;
 
             class Sub : Base
@@ -252,6 +252,44 @@ public sealed partial class UseDeclaringTypeAnalyzerTests
     }
 
     [Fact]
+    public async Task Analyze_Should_ReportQualifier_When_SimplifyNameGlobalNoneOverError()
+    {
+        // arrange
+        var source = WithLib(
+            """
+            using Lib;
+
+            class Sub : Base
+            {
+                {|#0:Derived|}.Nested item = null!;
+            }
+            """);
+
+        var test = CreateTest(source);
+        test.TestState.AnalyzerConfigFiles.Add((
+            "/.globalconfig",
+            """
+            is_global = true
+            dotnet_diagnostic.CCA0001.severity = none
+            """));
+        test.SolutionTransforms.Add(
+            (solution, projectId) => solution.WithProjectCompilationOptions(
+                projectId,
+                solution.GetProject(projectId)!.CompilationOptions!.WithSpecificDiagnosticOptions(
+                    new Dictionary<string, ReportDiagnostic>
+                    {
+                        ["CCA0001"] = ReportDiagnostic.Error
+                    })));
+        test.ExpectedDiagnostics.Add(
+            new DiagnosticResult("CCA0003", DiagnosticSeverity.Info)
+                .WithLocation(0)
+                .WithArguments("Nested", "Base"));
+
+        // act & assert
+        await test.RunAsync(TestContext.Current.CancellationToken);
+    }
+
+    [Fact]
     public async Task Analyze_Should_ReportQualifier_When_SimplifyNameRemovesOnlyNamespace()
     {
         // arrange
@@ -273,6 +311,44 @@ public sealed partial class UseDeclaringTypeAnalyzerTests
             new DiagnosticResult("CCA0003", DiagnosticSeverity.Info)
                 .WithLocation(0)
                 .WithArguments("Default", "Encoding"));
+
+        // act & assert
+        await test.RunAsync(TestContext.Current.CancellationToken);
+    }
+
+    [Fact]
+    public async Task Analyze_Should_ReportQualifier_When_SimplifyNameSuppressedOverGlobalWarning()
+    {
+        // arrange
+        var source = WithLib(
+            """
+            using Lib;
+
+            class Sub : Base
+            {
+                {|#0:Derived|}.Nested item = null!;
+            }
+            """);
+
+        var test = CreateTest(source);
+        test.TestState.AnalyzerConfigFiles.Add((
+            "/.globalconfig",
+            """
+            is_global = true
+            dotnet_diagnostic.CCA0001.severity = warning
+            """));
+        test.SolutionTransforms.Add(
+            (solution, projectId) => solution.WithProjectCompilationOptions(
+                projectId,
+                solution.GetProject(projectId)!.CompilationOptions!.WithSpecificDiagnosticOptions(
+                    new Dictionary<string, ReportDiagnostic>
+                    {
+                        ["CCA0001"] = ReportDiagnostic.Suppress
+                    })));
+        test.ExpectedDiagnostics.Add(
+            new DiagnosticResult("CCA0003", DiagnosticSeverity.Info)
+                .WithLocation(0)
+                .WithArguments("Nested", "Base"));
 
         // act & assert
         await test.RunAsync(TestContext.Current.CancellationToken);

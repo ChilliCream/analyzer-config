@@ -53,6 +53,27 @@ public sealed partial class UseDeclaringTypeAnalyzer
         return group[0];
     }
 
+    private static bool IsInsideNameof(
+        SemanticModel semanticModel,
+        SyntaxNode node,
+        CancellationToken cancellationToken)
+    {
+        foreach (var ancestor in node.Ancestors())
+        {
+            if (ancestor is InvocationExpressionSyntax
+                {
+                    Expression: IdentifierNameSyntax { Identifier.Text: "nameof" }
+                } invocation
+                && invocation.ArgumentList.Span.Contains(node.Span)
+                && semanticModel.GetSymbolInfo(invocation, cancellationToken).Symbol is null)
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
     private static bool NameofKeepsBinding(
         SemanticModel semanticModel,
         Candidate candidate,

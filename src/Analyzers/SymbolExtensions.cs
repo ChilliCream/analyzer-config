@@ -21,6 +21,27 @@ internal static class SymbolExtensions
         }
     }
 
+    extension(ISymbol? symbol)
+    {
+        public bool HasAttribute(string attributeName)
+        {
+            if (symbol is null)
+            {
+                return false;
+            }
+
+            foreach (var attribute in symbol.GetAttributes())
+            {
+                if (attribute.AttributeClass?.ToDisplayString() == attributeName)
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+    }
+
     private static bool IsDeclaredAfter(
         ILocalSymbol local,
         int position,
