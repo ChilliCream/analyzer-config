@@ -27,9 +27,9 @@ public sealed class RemoveRedundantTypeArgumentsCodeFixProvider : CodeFixProvide
             context.RegisterCodeFix(
                 CodeAction.Create(
                     Resources.RemoveRedundantTypeArgumentsCodeFixTitle,
-                    cancellationToken => SpanRemover.RemoveAsync(
-                        context.Document,
+                    cancellationToken => context.Document.ReplaceAsync(
                         diagnostic.Location.SourceSpan,
+                        string.Empty,
                         cancellationToken),
                     equivalenceKey: DiagnosticIds.RemoveRedundantTypeArguments),
                 diagnostic);

@@ -24,9 +24,9 @@ public sealed class SimplifyNameCodeFixProvider : CodeFixProvider
             context.RegisterCodeFix(
                 CodeAction.Create(
                     Resources.SimplifyNameCodeFixTitle,
-                    cancellationToken => SpanRemover.RemoveAsync(
-                        context.Document,
+                    cancellationToken => context.Document.ReplaceAsync(
                         diagnostic.Location.SourceSpan,
+                        string.Empty,
                         cancellationToken),
                     equivalenceKey: DiagnosticIds.SimplifyName),
                 diagnostic);

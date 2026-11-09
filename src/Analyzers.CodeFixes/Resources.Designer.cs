@@ -56,5 +56,11 @@ namespace ChilliCream.Analyzers {
                 return ResourceManager.GetString("SimplifyNameCodeFixTitle", resourceCulture);
             }
         }
+
+        internal static string UseDeclaringTypeCodeFixTitle {
+            get {
+                return ResourceManager.GetString("UseDeclaringTypeCodeFixTitle", resourceCulture);
+            }
+        }
     }
 }

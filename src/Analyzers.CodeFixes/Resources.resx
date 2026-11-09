@@ -18,4 +18,7 @@
   <data name="SimplifyNameCodeFixTitle" xml:space="preserve">
     <value>Simplify name</value>
   </data>
+  <data name="UseDeclaringTypeCodeFixTitle" xml:space="preserve">
+    <value>Use the declaring type</value>
+  </data>
 </root>
