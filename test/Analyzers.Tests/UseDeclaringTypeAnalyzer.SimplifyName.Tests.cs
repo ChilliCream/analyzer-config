@@ -97,6 +97,25 @@ public sealed partial class UseDeclaringTypeAnalyzerTests
     }
 
     [Fact]
+    public async Task Analyze_Should_ReportNothing_When_SimplifyNameDisabledByPragma()
+    {
+        // arrange
+        var source = WithLib(
+            """
+            #pragma warning disable CCA0001
+            using Lib;
+
+            class Sub : Base
+            {
+                Derived.Nested item = null!;
+            }
+            """);
+
+        // act & assert
+        await VerifyAsync(source);
+    }
+
+    [Fact]
     public async Task Analyze_Should_ReportNothing_When_SimplifyNameSetToWarning()
     {
         // arrange
