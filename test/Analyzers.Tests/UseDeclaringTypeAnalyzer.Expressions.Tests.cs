@@ -650,7 +650,8 @@ public sealed partial class UseDeclaringTypeAnalyzerTests
     {
         var lib = useLib ? "using Lib;\n" : string.Empty;
 
-        return $$"""
+        return
+            $$"""
             using System;
             using System.Linq;
             using System.Threading.Tasks;

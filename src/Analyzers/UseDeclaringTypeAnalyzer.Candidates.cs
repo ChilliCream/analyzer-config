@@ -41,7 +41,7 @@ public sealed partial class UseDeclaringTypeAnalyzer
             return null;
         }
 
-        if (IsSkippedContext(node) || HasComment(qualifier))
+        if (IsSkippedContext(node) || IsCrefContainer(node) || HasComment(qualifier))
         {
             return null;
         }
@@ -70,6 +70,15 @@ public sealed partial class UseDeclaringTypeAnalyzer
                 member,
                 option,
                 cancellationToken) is not { } replacement
+            || (!semanticModel.IsDiagnosticDisabled(
+                    DiagnosticIds.SimplifyName,
+                    cancellationToken)
+                && IsWholeQualifierSimplified(
+                    semanticModel,
+                    node,
+                    qualifier,
+                    right,
+                    cancellationToken))
             || semanticModel.HasErrors(node.Span, cancellationToken))
         {
             return null;
@@ -216,6 +225,29 @@ public sealed partial class UseDeclaringTypeAnalyzer
         }
 
         return node.FirstAncestorOrSelf<AttributeSyntax>()?.Name.Span.Contains(node.Span) == true;
+    }
+
+    private static bool IsWholeQualifierSimplified(
+        SemanticModel semanticModel,
+        SyntaxNode node,
+        ExpressionSyntax qualifier,
+        SimpleNameSyntax right,
+        CancellationToken cancellationToken)
+    {
+        var name = node;
+
+        while ((name.Parent is QualifiedNameSyntax qualifiedName && qualifiedName.Left == name)
+            || (name.Parent is MemberAccessExpressionSyntax memberAccess
+                && memberAccess.IsKind(SyntaxKind.SimpleMemberAccessExpression)
+                && memberAccess.Expression == name))
+        {
+            name = name.Parent;
+        }
+
+        return NameSimplifier.GetSimplification(semanticModel, name, cancellationToken)
+            is { RemovedSpan: var span }
+            && span.Start == qualifier.SpanStart
+            && span.End >= right.SpanStart;
     }
 
     private static ExpressionSyntax Parse(string text, SpeculativeBindingOption option)

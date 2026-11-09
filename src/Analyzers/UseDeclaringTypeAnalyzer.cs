@@ -43,12 +43,6 @@ public sealed partial class UseDeclaringTypeAnalyzer : DiagnosticAnalyzer
     {
         var node = context.Node;
 
-        if (node is QualifiedNameSyntax qualifiedName
-            && qualifiedName.FirstAncestorOrSelf<CrefSyntax>() is not null)
-        {
-            return;
-        }
-
         var insideNameof = node is MemberAccessExpressionSyntax
             && IsInsideNameof(context.SemanticModel, node, context.CancellationToken);
 
@@ -87,7 +81,9 @@ public sealed partial class UseDeclaringTypeAnalyzer : DiagnosticAnalyzer
     {
         if (candidate.Node is QualifiedNameSyntax qualifiedName)
         {
-            return !HasOuterTypeNameCandidate(semanticModel, qualifiedName, cancellationToken);
+            return !HasOuterTypeNameCandidate(semanticModel, qualifiedName, cancellationToken)
+                && (qualifiedName.FirstAncestorOrSelf<CrefSyntax>() is null
+                    || CrefKeepsBinding(semanticModel, candidate, cancellationToken));
         }
 
         return insideNameof

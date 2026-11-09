@@ -146,7 +146,8 @@ public sealed partial class UseDeclaringTypeAnalyzerTests
 
     private static string WrapRoot(string code)
     {
-        return $$"""
+        return
+            $$"""
             using Lib;
 
             {{code}}

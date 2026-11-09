@@ -4,7 +4,7 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace ChilliCream.Analyzers;
 
-public sealed partial class SimplifyNameAnalyzer
+internal static partial class NameSimplifier
 {
     private static Simplification? GetExpressionSimplification(
         SemanticModel semanticModel,

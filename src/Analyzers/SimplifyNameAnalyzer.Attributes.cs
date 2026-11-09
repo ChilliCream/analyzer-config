@@ -58,7 +58,7 @@ public sealed partial class SimplifyNameAnalyzer
                 return;
             }
 
-            if (ContainsReportedTypeArgument(
+            if (NameSimplifier.ContainsReportedTypeArgument(
                 context.SemanticModel,
                 name,
                 form.RemovedSpan,
