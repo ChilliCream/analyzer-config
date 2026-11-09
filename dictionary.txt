@@ -1,8 +1,10 @@
 accessibilities
+Browsable
 crefs
 globalconfig
 Linq
 netstandard
+nowarn
 resharper
 resheader
 resmimetype

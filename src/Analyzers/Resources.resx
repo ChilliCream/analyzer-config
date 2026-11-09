@@ -24,4 +24,10 @@
   <data name="SimplifyNameTitle" xml:space="preserve">
     <value>Simplify name</value>
   </data>
+  <data name="UseDeclaringTypeMessage" xml:space="preserve">
+    <value>Access '{0}' through its declaring type '{1}'</value>
+  </data>
+  <data name="UseDeclaringTypeTitle" xml:space="preserve">
+    <value>Access members through their declaring type</value>
+  </data>
 </root>

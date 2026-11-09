@@ -68,5 +68,17 @@ namespace ChilliCream.Analyzers {
                 return ResourceManager.GetString("SimplifyNameTitle", resourceCulture);
             }
         }
+
+        internal static string UseDeclaringTypeMessage {
+            get {
+                return ResourceManager.GetString("UseDeclaringTypeMessage", resourceCulture);
+            }
+        }
+
+        internal static string UseDeclaringTypeTitle {
+            get {
+                return ResourceManager.GetString("UseDeclaringTypeTitle", resourceCulture);
+            }
+        }
     }
 }

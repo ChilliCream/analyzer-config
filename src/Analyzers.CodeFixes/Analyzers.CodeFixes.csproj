@@ -13,6 +13,7 @@
 
   <ItemGroup>
     <Compile Include="../Analyzers/DiagnosticIds.cs" Link="DiagnosticIds.cs" />
+    <Compile Include="../Analyzers/DiagnosticProperties.cs" Link="DiagnosticProperties.cs" />
   </ItemGroup>
 
   <ItemGroup>

@@ -572,6 +572,24 @@ public sealed partial class SimplifyNameAnalyzerTests
     }
 
     [Fact]
+    public async Task Analyze_Should_ReportNothing_When_FixedNamespaceQualifiedOriginal()
+    {
+        // arrange
+        const string source =
+            """
+            using System.Text;
+
+            class C
+            {
+                Encoding M() => Encoding.Default;
+            }
+            """;
+
+        // act & assert
+        await VerifyAsync(source);
+    }
+
+    [Fact]
     public async Task Analyze_Should_ReportNothing_When_InaccessibleType()
     {
         // arrange

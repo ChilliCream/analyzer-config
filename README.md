@@ -36,6 +36,7 @@ The code-style analyzer rules only run in the IDE by default. To also enforce th
 | ---- | ----- |
 | [CCA0001](https://github.com/ChilliCream/analyzer-config/blob/main/docs/rules/CCA0001.md) | Simplify name |
 | [CCA0002](https://github.com/ChilliCream/analyzer-config/blob/main/docs/rules/CCA0002.md) | Remove redundant type arguments |
+| [CCA0003](https://github.com/ChilliCream/analyzer-config/blob/main/docs/rules/CCA0003.md) | Access members through their declaring type |
 
 These rules run during `dotnet build` without `EnforceCodeStyleInBuild`. The `ChilliCream.AnalyzerConfig.Libraries` package sets their severity to `warning`.
 
