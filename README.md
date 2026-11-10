@@ -50,7 +50,7 @@ The analyzers need the .NET 10 SDK or later, and older SDKs skip them with warni
 - **Minor** releases add analyzers, code fixes, or options, and change which rules the configuration enables: a rule set to `warning`, lowered, turned off, or removed from the configuration so that it falls back to its default severity. An analyzer that starts reporting in more places also ships in a minor release.
 - **Patch** releases fix false positives, false negatives, code fixes, crashes, documentation, and packaging.
 
-The configuration sets no rule above `warning`, so whether a warning fails the build is up to the project's `TreatWarningsAsErrors` setting. Any release can add warnings, so a project that builds with `TreatWarningsAsErrors` pins the version and updates it deliberately. The release notes list every rule whose severity changed, and the code fixes of the ChilliCream rules apply in one pass:
+The configuration sets no rule above `warning`, so whether a warning fails the build is up to the project's `TreatWarningsAsErrors` setting. Any release can add warnings, so a project that builds with `TreatWarningsAsErrors` pins the version and updates it deliberately. The release notes list every rule whose severity changed, and this command applies the code fixes of the ChilliCream rules:
 
 ```sh
 dotnet format analyzers --diagnostics CCA0001 CCA0002 CCA0003 --severity info
