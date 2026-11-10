@@ -41,3 +41,17 @@ The code-style analyzer rules only run in the IDE by default. To also enforce th
 These rules run during `dotnet build` without `EnforceCodeStyleInBuild`. The `ChilliCream.AnalyzerConfig.Libraries` package sets their severity to `warning`.
 
 The analyzers need the .NET 10 SDK or later, and older SDKs skip them with warning CS9057.
+
+## Versioning
+
+`ChilliCream.Analyzers` and `ChilliCream.AnalyzerConfig.Libraries` are released together under one version number, which follows [Semantic Versioning](https://semver.org/). A new warning does not count as a breaking change:
+
+- **Major** releases remove or rename an analyzer, a rule ID, or a package, raise the .NET SDK or compiler version the analyzers need, or change the package's MSBuild properties and targets in a way that changes compilation.
+- **Minor** releases add analyzers, code fixes, or options, and change which rules the configuration enables: a rule set to `warning`, lowered, turned off, or removed from the configuration so that it falls back to its default severity. An analyzer that starts reporting in more places also ships in a minor release.
+- **Patch** releases fix false positives, false negatives, code fixes, crashes, documentation, and packaging.
+
+The configuration sets no rule above `warning`, so whether a warning fails the build is up to the project's `TreatWarningsAsErrors` setting. Any release can add warnings, so a project that builds with `TreatWarningsAsErrors` pins the version and updates it deliberately. The release notes list every rule whose severity changed, and the code fixes of the ChilliCream rules apply in one pass:
+
+```sh
+dotnet format analyzers --diagnostics CCA0001 CCA0002 CCA0003 --severity info
+```
