@@ -1,6 +1,4 @@
 using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace ChilliCream.Analyzers;
 
@@ -8,11 +6,13 @@ internal sealed class CandidateProof(
     SemanticModel semanticModel,
     SyntaxNode root,
     List<Candidate> candidates,
+    Func<Candidate, SpeculativeRewrite> createRewrite,
     CancellationToken cancellationToken)
 {
     private readonly SemanticModel _semanticModel = semanticModel;
     private readonly SyntaxNode _root = root;
     private readonly List<Candidate> _candidates = candidates;
+    private readonly Func<Candidate, SpeculativeRewrite> _createRewrite = createRewrite;
     private readonly CancellationToken _cancellationToken = cancellationToken;
     private readonly int[] _outers = new int[candidates.Count];
     private readonly bool[] _inSet = new bool[candidates.Count];
@@ -51,19 +51,6 @@ internal sealed class CandidateProof(
         return proven;
     }
 
-    private static SpeculativeRewrite CreateRewrite(Candidate candidate)
-    {
-        var replacement = SyntaxFactory
-            .ParseExpression(candidate.Replacement)
-            .WithTriviaFrom(candidate.Qualifier);
-
-        return new SpeculativeRewrite(
-            (ExpressionSyntax)candidate.Node,
-            candidate.Qualifier,
-            replacement,
-            candidate.Member);
-    }
-
     private int FindOuter(int index)
     {
         for (var j = index - 1; j >= 0; j--)
@@ -85,7 +72,7 @@ internal sealed class CandidateProof(
         {
             if (_inSet[i])
             {
-                rewrites.Add(CreateRewrite(_candidates[i]));
+                rewrites.Add(_createRewrite(_candidates[i]));
             }
         }
 
@@ -147,7 +134,7 @@ internal sealed class CandidateProof(
 
     private bool SurvivesAlone(int index)
     {
-        List<SpeculativeRewrite> rewrites = [CreateRewrite(_candidates[index])];
+        List<SpeculativeRewrite> rewrites = [_createRewrite(_candidates[index])];
 
         SpeculativeBinding.DropRewritesThatChangeBinding(
             _semanticModel,

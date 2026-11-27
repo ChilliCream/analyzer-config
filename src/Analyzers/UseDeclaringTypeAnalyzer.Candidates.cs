@@ -46,7 +46,7 @@ public sealed partial class UseDeclaringTypeAnalyzer
             return null;
         }
 
-        if (IsSkippedContext(node) || IsCrefContainer(node) || HasComment(qualifier))
+        if (IsSkippedContext(node) || IsCrefContainer(node) || qualifier.HasComment(qualifier.Span))
         {
             return null;
         }
@@ -174,22 +174,6 @@ public sealed partial class UseDeclaringTypeAnalyzer
         foreach (var candidate in info.CandidateSymbols)
         {
             if (SymbolEqualityComparer.Default.Equals(candidate.OriginalDefinition, original))
-            {
-                return true;
-            }
-        }
-
-        return false;
-    }
-
-    private static bool HasComment(ExpressionSyntax qualifier)
-    {
-        foreach (var trivia in qualifier.DescendantTrivia(qualifier.Span))
-        {
-            if (trivia.IsKind(SyntaxKind.SingleLineCommentTrivia)
-                || trivia.IsKind(SyntaxKind.MultiLineCommentTrivia)
-                || trivia.IsKind(SyntaxKind.SingleLineDocumentationCommentTrivia)
-                || trivia.IsKind(SyntaxKind.MultiLineDocumentationCommentTrivia))
             {
                 return true;
             }

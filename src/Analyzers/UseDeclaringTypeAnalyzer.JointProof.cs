@@ -1,4 +1,5 @@
 using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace ChilliCream.Analyzers;
@@ -37,6 +38,19 @@ public sealed partial class UseDeclaringTypeAnalyzer
         return candidates;
     }
 
+    private static SpeculativeRewrite CreateRewrite(Candidate candidate)
+    {
+        var replacement = SyntaxFactory
+            .ParseExpression(candidate.Replacement)
+            .WithTriviaFrom(candidate.Qualifier);
+
+        return new SpeculativeRewrite(
+            (ExpressionSyntax)candidate.Node,
+            candidate.Qualifier,
+            replacement,
+            candidate.Member);
+    }
+
     private static bool KeepsBinding(
         SemanticModel semanticModel,
         Candidate candidate,
@@ -45,7 +59,7 @@ public sealed partial class UseDeclaringTypeAnalyzer
         return candidate.Node is ExpressionSyntax node
             && SpeculativeBinding.GetRoot(node) is { } root
             && CollectCandidates(semanticModel, root, cancellationToken) is { Count: > 0 } all
-            && new CandidateProof(semanticModel, root, all, cancellationToken)
+            && new CandidateProof(semanticModel, root, all, CreateRewrite, cancellationToken)
                 .Prove()
                 .Contains(node);
     }
