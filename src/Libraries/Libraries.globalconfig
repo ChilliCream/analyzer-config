@@ -11,6 +11,9 @@ dotnet_diagnostic.IDE0002.severity = none
 dotnet_diagnostic.CCA0002.severity = warning
 # Access members through their declaring type.
 dotnet_diagnostic.CCA0003.severity = warning
+# Remove `this` qualification.
+dotnet_diagnostic.CCA0004.severity = warning
+dotnet_diagnostic.IDE0003.severity = none
 
 ## Quality rules ##
 # https://docs.microsoft.com/en-us/dotnet/fundamentals/code-analysis/quality-rules
@@ -42,8 +45,6 @@ dotnet_diagnostic.CA1866.severity = warning
 ## Style rules ##
 # https://docs.microsoft.com/en-us/dotnet/fundamentals/code-analysis/style-rules/
 
-# Remove `this` or `Me` qualification.
-dotnet_diagnostic.IDE0003.severity = warning
 # Remove unnecessary cast.
 dotnet_diagnostic.IDE0004.severity = warning
 # Remove unnecessary using directives.
