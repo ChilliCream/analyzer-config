@@ -1,0 +1,5 @@
+<Project>
+
+  <Import Project="$(MSBuildThisFileDirectory)../src/Libraries/build/ChilliCream.AnalyzerConfig.Libraries.targets" />
+
+</Project>
