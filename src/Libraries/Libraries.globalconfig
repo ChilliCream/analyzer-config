@@ -250,4 +250,6 @@ dotnet_diagnostic.RCS9003.severity = warning
 
 ## SYSLIB rules ##
 # https://learn.microsoft.com/en-us/dotnet/fundamentals/syslib-diagnostics/source-generator-overview
+
+# Use GeneratedRegexAttribute to generate the regular expression implementation at compile time.
 dotnet_diagnostic.SYSLIB1045.severity = warning
