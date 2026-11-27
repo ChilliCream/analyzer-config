@@ -15,6 +15,9 @@
   <data name="RemoveRedundantTypeArgumentsCodeFixTitle" xml:space="preserve">
     <value>Remove type arguments</value>
   </data>
+  <data name="RemoveThisQualificationCodeFixTitle" xml:space="preserve">
+    <value>Remove 'this' qualification</value>
+  </data>
   <data name="SimplifyNameCodeFixTitle" xml:space="preserve">
     <value>Simplify name</value>
   </data>
