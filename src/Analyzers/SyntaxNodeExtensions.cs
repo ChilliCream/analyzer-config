@@ -29,5 +29,18 @@ internal static class SyntaxNodeExtensions
 
             return false;
         }
+
+        public bool HasDirective(TextSpan span)
+        {
+            foreach (var trivia in node.DescendantTrivia(span))
+            {
+                if (trivia.IsDirective)
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
     }
 }

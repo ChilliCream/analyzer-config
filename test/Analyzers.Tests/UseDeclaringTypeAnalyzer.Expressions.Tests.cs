@@ -340,6 +340,17 @@ public sealed partial class UseDeclaringTypeAnalyzerTests
     }
 
     [Fact]
+    public async Task Analyze_Should_ReportQualifier_When_AnonymousTypeMember()
+    {
+        // arrange
+        var source = WrapExpression(
+            "var x = new { Value = [|Derived|].Value };\nvar y = new { [|Derived|].Value };");
+
+        // act & assert
+        await VerifyAsync(source);
+    }
+
+    [Fact]
     public async Task Analyze_Should_ReportQualifier_When_AssignmentTarget()
     {
         // arrange
@@ -377,6 +388,17 @@ public sealed partial class UseDeclaringTypeAnalyzerTests
 
         // act & assert
         await test.RunAsync(TestContext.Current.CancellationToken);
+    }
+
+    [Fact]
+    public async Task Analyze_Should_ReportQualifier_When_CollectionExpressionElement()
+    {
+        // arrange
+        var source = WrapExpression(
+            "int[] values = [[|Derived|].Value];");
+
+        // act & assert
+        await VerifyAsync(source);
     }
 
     [Fact]
