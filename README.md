@@ -37,6 +37,7 @@ The code-style analyzer rules only run in the IDE by default. To also enforce th
 | [CCA0001](https://github.com/ChilliCream/analyzer-config/blob/main/docs/rules/CCA0001.md) | Simplify name |
 | [CCA0002](https://github.com/ChilliCream/analyzer-config/blob/main/docs/rules/CCA0002.md) | Remove redundant type arguments |
 | [CCA0003](https://github.com/ChilliCream/analyzer-config/blob/main/docs/rules/CCA0003.md) | Access members through their declaring type |
+| [CCA0004](https://github.com/ChilliCream/analyzer-config/blob/main/docs/rules/CCA0004.md) | Remove 'this' qualification |
 
 These rules run during `dotnet build` without `EnforceCodeStyleInBuild`. The `ChilliCream.AnalyzerConfig.Libraries` package sets their severity to `warning`.
 
@@ -53,5 +54,5 @@ The analyzers need the .NET 10 SDK or later, and older SDKs skip them with warni
 The configuration sets no rule above `warning`, so whether a warning fails the build is up to the project's `TreatWarningsAsErrors` setting. Any release can add warnings, so a project that builds with `TreatWarningsAsErrors` pins the version and updates it deliberately. The release notes list every rule whose severity changed, and this command applies the code fixes of the ChilliCream rules:
 
 ```sh
-dotnet format analyzers --diagnostics CCA0001 CCA0002 CCA0003 --severity info
+dotnet format analyzers --diagnostics CCA0001 CCA0002 CCA0003 CCA0004 --severity info
 ```

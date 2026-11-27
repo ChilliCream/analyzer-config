@@ -51,6 +51,12 @@ namespace ChilliCream.Analyzers {
             }
         }
 
+        internal static string RemoveThisQualificationCodeFixTitle {
+            get {
+                return ResourceManager.GetString("RemoveThisQualificationCodeFixTitle", resourceCulture);
+            }
+        }
+
         internal static string SimplifyNameCodeFixTitle {
             get {
                 return ResourceManager.GetString("SimplifyNameCodeFixTitle", resourceCulture);

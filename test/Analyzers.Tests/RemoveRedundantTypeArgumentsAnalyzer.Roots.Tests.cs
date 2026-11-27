@@ -89,6 +89,31 @@ public sealed partial class RemoveRedundantTypeArgumentsAnalyzerTests
     [InlineData(NullableContextOptions.Disable)]
     [InlineData(NullableContextOptions.Enable)]
     public async Task
+        Analyze_Should_ReportTypeArgumentList_When_AnonymousTypeMember(
+            NullableContextOptions nullable)
+    {
+        // arrange
+        const string source =
+            """
+            class C
+            {
+                object M() => new { X = H.Id[|<string>|]("x") };
+            }
+
+            static class H
+            {
+                public static T Id<T>(T value) => value;
+            }
+            """;
+
+        // act & assert
+        await VerifyAsync(source, nullable);
+    }
+
+    [Theory]
+    [InlineData(NullableContextOptions.Disable)]
+    [InlineData(NullableContextOptions.Enable)]
+    public async Task
         Analyze_Should_ReportTypeArgumentList_When_BlockLambdaInFieldInitializer(
             NullableContextOptions nullable)
     {
@@ -132,6 +157,31 @@ public sealed partial class RemoveRedundantTypeArgumentsAnalyzerTests
                 {
                     Run(() => { return H.Id[|<string>|]("x"); });
                 }
+            }
+
+            static class H
+            {
+                public static T Id<T>(T value) => value;
+            }
+            """;
+
+        // act & assert
+        await VerifyAsync(source, nullable);
+    }
+
+    [Theory]
+    [InlineData(NullableContextOptions.Disable)]
+    [InlineData(NullableContextOptions.Enable)]
+    public async Task
+        Analyze_Should_ReportTypeArgumentList_When_CollectionExpressionElement(
+            NullableContextOptions nullable)
+    {
+        // arrange
+        const string source =
+            """
+            class C
+            {
+                string[] M() => [H.Id[|<string>|]("x")];
             }
 
             static class H

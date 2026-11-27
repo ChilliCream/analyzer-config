@@ -18,6 +18,12 @@
   <data name="RemoveRedundantTypeArgumentsTitle" xml:space="preserve">
     <value>Remove redundant type arguments</value>
   </data>
+  <data name="RemoveThisQualificationMessage" xml:space="preserve">
+    <value>Access to '{0}' can be simplified by removing 'this.'</value>
+  </data>
+  <data name="RemoveThisQualificationTitle" xml:space="preserve">
+    <value>Remove 'this' qualification</value>
+  </data>
   <data name="SimplifyNameMessage" xml:space="preserve">
     <value>Name can be simplified by removing '{0}'</value>
   </data>

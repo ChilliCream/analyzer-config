@@ -5,6 +5,7 @@ globalconfig
 Linq
 netstandard
 nowarn
+reparses
 resharper
 resheader
 resmimetype

@@ -7,4 +7,6 @@ internal static class DiagnosticIds
     public const string RemoveRedundantTypeArguments = "CCA0002";
 
     public const string UseDeclaringType = "CCA0003";
+
+    public const string RemoveThisQualification = "CCA0004";
 }

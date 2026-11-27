@@ -6,11 +6,12 @@ namespace ChilliCream.Analyzers;
 
 internal static class SpeculativeBinding
 {
-    // Each rewrite's Target lies strictly inside its Node, and no two Targets overlap.
+    // Each rewrite's Target is its Node or lies inside it, and no two Targets overlap.
     public static bool DropRewritesThatChangeBinding(
         SemanticModel semanticModel,
         SyntaxNode root,
         List<SpeculativeRewrite> rewrites,
+        bool requireSameParse,
         CancellationToken cancellationToken)
     {
         var tracked = new SyntaxNode[rewrites.Count * 2];
@@ -25,12 +26,15 @@ internal static class SpeculativeBinding
 
         foreach (var rewrite in rewrites)
         {
+            var current = speculated.GetCurrentNode(rewrite.Target)!;
+
             speculated = speculated.ReplaceNode(
-                speculated.GetCurrentNode(rewrite.Target)!,
-                rewrite.Replacement);
+                current,
+                current.CopyAnnotationsTo(rewrite.Replacement)!);
         }
 
-        if (GetSpeculativeModel(semanticModel, root.SpanStart, speculated)
+        if ((requireSameParse && !ReparsesEquivalently(speculated))
+            || GetSpeculativeModel(semanticModel, root.SpanStart, speculated)
                 is not { } speculativeModel
             || !RootKeepsBinding(
                 semanticModel,
@@ -102,7 +106,8 @@ internal static class SpeculativeBinding
                         return false;
                     }
 
-                    if (original is not AnonymousFunctionExpressionSyntax
+                    if (original is not (AnonymousFunctionExpressionSyntax
+                            or AnonymousObjectCreationExpressionSyntax)
                         && !comparer.Equals(
                             semanticModel.GetSymbolInfo(original, cancellationToken).Symbol,
                             speculativeModel.GetSymbolInfo(speculated, cancellationToken).Symbol))
@@ -221,6 +226,9 @@ internal static class SpeculativeBinding
         return node switch
         {
             ExpressionSyntax => true,
+            ExpressionElementSyntax => true,
+            SpreadElementSyntax => true,
+            AnonymousObjectMemberDeclaratorSyntax => true,
             ArgumentSyntax => true,
             ArgumentListSyntax => true,
             BracketedArgumentListSyntax => true,
@@ -230,6 +238,7 @@ internal static class SpeculativeBinding
             VariableDeclarationSyntax => true,
             ArrowExpressionClauseSyntax => true,
             SwitchExpressionArmSyntax => true,
+            WhenClauseSyntax { Parent: SwitchExpressionArmSyntax } => true,
             InterpolationSyntax => true,
             ElseClauseSyntax => true,
             SwitchSectionSyntax => true,
@@ -264,6 +273,35 @@ internal static class SpeculativeBinding
             PrimaryConstructorBaseTypeSyntax => true,
             _ => false
         };
+    }
+
+    private static bool ReparsesEquivalently(SyntaxNode speculated)
+    {
+        var options = speculated.SyntaxTree.Options;
+        (SyntaxNode Node, Func<string, SyntaxNode> Parse) selection = speculated switch
+        {
+            StatementSyntax statement =>
+                (statement, text => SyntaxFactory.ParseStatement(text, options: options)),
+            EqualsValueClauseSyntax equalsValue =>
+                (equalsValue.Value, text => SyntaxFactory.ParseExpression(text, options: options)),
+            ArrowExpressionClauseSyntax arrow =>
+                (arrow.Expression, text => SyntaxFactory.ParseExpression(text, options: options)),
+            ConstructorInitializerSyntax initializer =>
+                (
+                    initializer.ArgumentList,
+                    text => SyntaxFactory.ParseArgumentList(text, options: options)),
+            PrimaryConstructorBaseTypeSyntax baseType =>
+                (
+                    baseType.ArgumentList,
+                    text => SyntaxFactory.ParseArgumentList(text, options: options)),
+            _ => default
+        };
+
+        return selection.Node is not null
+            && SyntaxFactory.AreEquivalent(
+                selection.Node,
+                selection.Parse(selection.Node.ToString()),
+                topLevel: false);
     }
 
     private static bool RootKeepsBinding(
