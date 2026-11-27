@@ -7,12 +7,14 @@ internal sealed class CandidateProof(
     SyntaxNode root,
     List<Candidate> candidates,
     Func<Candidate, SpeculativeRewrite> createRewrite,
+    bool requireSameParse,
     CancellationToken cancellationToken)
 {
     private readonly SemanticModel _semanticModel = semanticModel;
     private readonly SyntaxNode _root = root;
     private readonly List<Candidate> _candidates = candidates;
     private readonly Func<Candidate, SpeculativeRewrite> _createRewrite = createRewrite;
+    private readonly bool _requireSameParse = requireSameParse;
     private readonly CancellationToken _cancellationToken = cancellationToken;
     private readonly int[] _outers = new int[candidates.Count];
     private readonly bool[] _inSet = new bool[candidates.Count];
@@ -81,6 +83,7 @@ internal sealed class CandidateProof(
                 _semanticModel,
                 _root,
                 rewrites,
+                _requireSameParse,
                 _cancellationToken))
         {
             return false;
@@ -140,6 +143,7 @@ internal sealed class CandidateProof(
             _semanticModel,
             _root,
             rewrites,
+            _requireSameParse,
             _cancellationToken);
 
         return rewrites.Count == 1;

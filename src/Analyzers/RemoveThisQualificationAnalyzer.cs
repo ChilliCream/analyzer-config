@@ -83,6 +83,7 @@ public sealed partial class RemoveThisQualificationAnalyzer : DiagnosticAnalyzer
                     group.Key,
                     [.. group],
                     CreateRewrite,
+                    requireSameParse: true,
                     cancellationToken)
                 .Prove();
 

@@ -59,7 +59,13 @@ public sealed partial class UseDeclaringTypeAnalyzer
         return candidate.Node is ExpressionSyntax node
             && SpeculativeBinding.GetRoot(node) is { } root
             && CollectCandidates(semanticModel, root, cancellationToken) is { Count: > 0 } all
-            && new CandidateProof(semanticModel, root, all, CreateRewrite, cancellationToken)
+            && new CandidateProof(
+                    semanticModel,
+                    root,
+                    all,
+                    CreateRewrite,
+                    requireSameParse: false,
+                    cancellationToken)
                 .Prove()
                 .Contains(node);
     }

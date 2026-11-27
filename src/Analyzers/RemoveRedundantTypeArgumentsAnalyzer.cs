@@ -165,6 +165,7 @@ public sealed class RemoveRedundantTypeArgumentsAnalyzer : DiagnosticAnalyzer
             semanticModel,
             root,
             rewrites,
+            requireSameParse: false,
             cancellationToken))
         {
             return false;
@@ -186,6 +187,7 @@ public sealed class RemoveRedundantTypeArgumentsAnalyzer : DiagnosticAnalyzer
                 semanticModel,
                 root,
                 single,
+                requireSameParse: false,
                 cancellationToken))
             {
                 rewrites.Add(rewrite);
@@ -197,6 +199,7 @@ public sealed class RemoveRedundantTypeArgumentsAnalyzer : DiagnosticAnalyzer
                 semanticModel,
                 root,
                 rewrites,
+                requireSameParse: false,
                 cancellationToken))
         {
             if (rewrites.Count == 0 || rewrites[0].Node != invocation)
